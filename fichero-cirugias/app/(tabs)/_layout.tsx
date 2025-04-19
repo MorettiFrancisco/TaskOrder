@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -34,13 +34,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: 'Buscar',
-          tabBarIcon: ({ color }) => <Ionicons size={28} name="search" color={color} />,
-        }}
-            />
       <Tabs.Screen
         name="configuration"
         options={{

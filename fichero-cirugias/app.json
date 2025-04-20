@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/app-medica.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.morettifrancisco.ficherocirugias"
     },
     "web": {
       "bundler": "metro",

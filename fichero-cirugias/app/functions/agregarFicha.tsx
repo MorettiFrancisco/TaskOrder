@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { agregarFicha, existeFichaPorTecnica, obtenerFichaPorTecnica } from '../../utils/fichasStorage';
 import Ficha from '../../models/ficha';
+import { useColorScheme } from 'react-native';
 
 export default function AgregarFichaScreen() {
     const [nombreTecnica, setNombreTecnica] = useState('');
     const [doctor, setDoctor] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const router = useRouter();
+    const colorScheme = useColorScheme();
+    const backgroundColor = colorScheme === 'dark' ? '#23272f' : '#fff';
+    const textColor = colorScheme === 'dark' ? '#fff' : '#23272f';
+    const inputBg = colorScheme === 'dark' ? '#2a2e37' : '#f9f9f9';
+    const borderColor = colorScheme === 'dark' ? '#555' : '#ccc';
+    const buttonBg = colorScheme === 'dark' ? '#d72660' : '#d72660';
+    const buttonText = '#fff';
 
     const handleGuardar = async () => {
         if (!nombreTecnica.trim() || !doctor.trim() || !descripcion.trim()) {
@@ -58,58 +66,108 @@ export default function AgregarFichaScreen() {
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Agregar Ficha</Text>
-            <Text style={styles.label}>Nombre de la Técnica</Text>
-            <TextInput
-                style={styles.input}
-                value={nombreTecnica}
-                onChangeText={setNombreTecnica}
-                placeholder="Ej: Colecistectomía"
-                autoCapitalize="sentences"
-            />
-            <Text style={styles.label}>Doctor</Text>
-            <TextInput
-                style={styles.input}
-                value={doctor}
-                onChangeText={setDoctor}
-                placeholder="Ej: Dr. Pérez"
-                autoCapitalize="words"
-            />
-            <Text style={styles.label}>Descripción / Técnica Quirúrgica</Text>
-            <TextInput
-                style={styles.textArea}
-                value={descripcion}
-                onChangeText={setDescripcion}
-                placeholder="Describa la técnica quirúrgica en detalle..."
-                multiline
-                textAlignVertical="top"
-            />
-            <Button title="Guardar Ficha" onPress={handleGuardar} color="#007bff" />
+        <ScrollView contentContainerStyle={[styles.container, { backgroundColor }]}>
+            <View style={[styles.form, { backgroundColor: colorScheme === 'dark' ? '#292d36' : '#fff', borderColor }]}>
+                <Text style={[styles.title, { color: textColor }]}>Agregar Ficha</Text>
+                <Text style={[styles.label, { color: textColor }]}>Nombre de la Técnica</Text>
+                <TextInput
+                    style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor }]}
+                    value={nombreTecnica}
+                    onChangeText={setNombreTecnica}
+                    placeholder="Ej: Colecistectomía"
+                    placeholderTextColor={colorScheme === 'dark' ? '#aaa' : '#888'}
+                    autoCapitalize="sentences"
+                />
+                <Text style={[styles.label, { color: textColor }]}>Doctor</Text>
+                <TextInput
+                    style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor }]}
+                    value={doctor}
+                    onChangeText={setDoctor}
+                    placeholder="Ej: Dr. Pérez"
+                    placeholderTextColor={colorScheme === 'dark' ? '#aaa' : '#888'}
+                    autoCapitalize="words"
+                />
+                <Text style={[styles.label, { color: textColor }]}>Descripción / Técnica Quirúrgica</Text>
+                <TextInput
+                    style={[styles.textArea, { backgroundColor: inputBg, color: textColor, borderColor }]}
+                    value={descripcion}
+                    onChangeText={setDescripcion}
+                    placeholder="Describa la técnica quirúrgica en detalle..."
+                    placeholderTextColor={colorScheme === 'dark' ? '#aaa' : '#888'}
+                    multiline
+                    textAlignVertical="top"
+                />
+                <TouchableOpacity
+                    style={[styles.button, { backgroundColor: buttonBg }]}
+                    onPress={handleGuardar}
+                    activeOpacity={0.85}
+                >
+                    <Text style={[styles.buttonText, { color: buttonText }]}>Guardar Ficha</Text>
+                </TouchableOpacity>
+            </View>
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flexGrow: 1, padding: 20, backgroundColor: '#fff' },
-    title: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
-    label: { fontSize: 16, fontWeight: 'bold', marginTop: 12, marginBottom: 4 },
+    container: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+    },
+    form: {
+        width: '100%',
+        maxWidth: 420,
+        borderRadius: 16,
+        padding: 24,
+        borderWidth: 1,
+        shadowColor: '#000',
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+    title: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    label: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginTop: 12,
+        marginBottom: 4,
+    },
     input: {
         borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 6,
+        borderRadius: 8,
         padding: 10,
         fontSize: 16,
-        backgroundColor: '#f9f9f9'
+        marginBottom: 4,
     },
     textArea: {
         borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 6,
+        borderRadius: 8,
         padding: 10,
         fontSize: 16,
-        backgroundColor: '#f9f9f9',
-        minHeight: 120,
-        marginBottom: 20
-    }
+        minHeight: 100,
+        marginBottom: 20,
+    },
+    button: {
+        marginTop: 18,
+        alignSelf: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 36,
+        borderRadius: 24,
+        elevation: 2,
+        shadowColor: '#d72660',
+        shadowOpacity: 0.18,
+        shadowRadius: 6,
+    },
+    buttonText: {
+        fontWeight: 'bold',
+        fontSize: 16,
+        letterSpacing: 0.5,
+    },
 });

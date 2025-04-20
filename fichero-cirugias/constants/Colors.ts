@@ -3,26 +3,30 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+/**
+ * Paleta personalizada: rosados y pastel para toda la app.
+ */
+
+const tintColorLight = '#d72660'; // Rosado fuerte
+const tintColorDark = '#ffb6d5';  // Rosado pastel claro
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+    text: '#23272f',           // Gris oscuro para buena lectura
+    background: '#fff',        // Fondo blanco
+    tint: tintColorLight,      // Rosado fuerte
+    icon: '#d72660',           // Rosado fuerte para íconos
+    tabIconDefault: '#ffb6d5', // Rosado pastel claro
     tabIconSelected: tintColorLight,
-    card: '#f2f2f2', 
+    card: '#ffe4ec',           // Rosado pastel para tarjetas
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    text: '#fff',              // Texto blanco
+    background: '#23272f',     // Gris oscuro azulado
+    tint: tintColorDark,       // Rosado pastel claro
+    icon: '#ffb6d5',           // Rosado pastel claro para íconos
+    tabIconDefault: '#ffb6d5',
     tabIconSelected: tintColorDark,
-    card: '#1e1e1e',
+    card: '#2a2e37',           // Gris azulado para tarjetas en dark
   },
 };

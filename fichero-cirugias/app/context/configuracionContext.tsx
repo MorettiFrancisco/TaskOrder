@@ -1,14 +1,13 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
 import { cargarFichas, guardarFichas } from '../../utils/fichasStorage';
+import { useColorScheme } from 'react-native';
 
 type FontSize = 'pequeño' | 'mediano' | 'grande';
 
 interface ConfiguracionContextProps {
-    darkMode: boolean;
-    setDarkMode: (value: boolean) => void;
     fontSize: FontSize;
     setFontSize: (value: FontSize) => void;
     exportarFichas: () => Promise<void>;
@@ -24,7 +23,6 @@ export const useConfiguracion = () => {
 };
 
 export function ConfiguracionProvider({ children }: { children: ReactNode }) {
-    const [darkMode, setDarkMode] = useState(false);
     const [fontSize, setFontSize] = useState<FontSize>('mediano');
 
     const exportarFichas = async () => {
@@ -66,9 +64,10 @@ export function ConfiguracionProvider({ children }: { children: ReactNode }) {
 
     return (
         <ConfiguracionContext.Provider
-            value={{ darkMode, setDarkMode, fontSize, setFontSize, exportarFichas, importarFichas }}
+            value={{ fontSize, setFontSize, exportarFichas, importarFichas }}
         >
             {children}
         </ConfiguracionContext.Provider>
     );
 }
+

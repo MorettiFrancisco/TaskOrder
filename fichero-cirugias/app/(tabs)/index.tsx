@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Platform,
   StatusBar,
   SafeAreaView,
+  useColorScheme,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useConfiguracion } from '../context/configuracionContext';
@@ -16,24 +17,26 @@ import { Colors } from '../../constants/Colors';
 import { FontsSize } from '../../constants/FontsSize';
 import { cargarFichas } from '../../utils/fichasStorage';
 import Ficha from '../../models/ficha';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function HomeScreen() {
   const [fichas, setFichas] = useState<Ficha[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
-  const { darkMode, fontSize } = useConfiguracion();
+  const { fontSize } = useConfiguracion();
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+  const backgroundColor = colorScheme === 'dark' ? '#23272f' : '#fff';
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await cargarFichas();
-      setFichas(data);
-    };
-    fetchData();
-  }, []);
-
-  const backgroundColor = darkMode ? '#23272f' : '#fff';
-  const cardColor = darkMode ? '#353945' : '#ffe4ec';
-  const theme = darkMode ? Colors.dark : Colors.light;
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        const data = await cargarFichas();
+        setFichas(data);
+      };
+      fetchData();
+    }, [])
+  );
 
   const filteredFichas = fichas.filter(
     (item) =>
@@ -53,11 +56,11 @@ export default function HomeScreen() {
         ]}
       >
         <StatusBar
-          barStyle={darkMode ? 'light-content' : 'dark-content'}
+          barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
           backgroundColor={backgroundColor}
         />
         <View style={[styles.header, { backgroundColor }]}>
-          <Text style={[styles.appTitle, { color: darkMode ? '#fff' : '#d72660' }]}>
+          <Text style={[styles.appTitle, { color: colorScheme === 'dark' ? '#fff' : '#d72660' }]}>
             Fichero Cirugías
           </Text>
         </View>
@@ -71,13 +74,13 @@ export default function HomeScreen() {
                   styles.searchInput,
                   {
                     color: theme.text,
-                    borderColor: darkMode ? '#555' : '#ffb6d5',
-                    backgroundColor: darkMode ? '#2a2e37' : '#fff',
+                    borderColor: colorScheme === 'dark' ? '#555' : '#ffb6d5',
+                    backgroundColor: colorScheme === 'dark' ? '#2a2e37' : '#fff',
                     fontSize: FontsSize[fontSize],
                   },
                 ]}
                 placeholder="Buscar por técnica o doctor..."
-                placeholderTextColor={darkMode ? '#aaa' : '#d72660'}
+                placeholderTextColor={colorScheme === 'dark' ? '#aaa' : '#d72660'}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 clearButtonMode="while-editing"
@@ -86,12 +89,12 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={[
                 styles.addButton,
-                { backgroundColor: darkMode ? '#353945' : '#ffb6d5', marginLeft: 8 },
+                { backgroundColor: colorScheme === 'dark' ? '#353945' : '#ffb6d5', marginLeft: 8 },
               ]}
               onPress={() => router.push('/functions/agregarFicha')}
               activeOpacity={0.8}
             >
-              <Text style={{ color: darkMode ? '#fff' : '#d72660', fontSize: 28, fontWeight: 'bold' }}>+</Text>
+              <Text style={{ color: colorScheme === 'dark' ? '#ffb6d5' : '#d72660', fontSize: 28, fontWeight: 'bold' }}>+</Text>
             </TouchableOpacity>
           </View>
 
@@ -139,9 +142,9 @@ export default function HomeScreen() {
                 style={[
                   styles.card,
                   {
-                    backgroundColor: cardColor,
-                    shadowColor: darkMode ? '#000' : '#d72660',
-                    borderColor: darkMode ? '#2a2e37' : '#ffb6d5',
+                    backgroundColor: '#ffe4ec', // SIEMPRE rosado claro
+                    shadowColor: '#d72660',
+                    borderColor: '#ffb6d5',
                   },
                 ]}
                 activeOpacity={0.85}
@@ -150,7 +153,7 @@ export default function HomeScreen() {
                 <Text
                   style={[
                     styles.technique,
-                    { color: darkMode ? '#fff' : '#d72660', fontSize: FontsSize[fontSize] + 2 },
+                    { color: '#d72660', fontSize: FontsSize[fontSize] + 2 }, // SIEMPRE rosado fuerte
                   ]}
                 >
                   {item.nombre_tecnica}
@@ -158,7 +161,7 @@ export default function HomeScreen() {
                 <Text
                   style={[
                     styles.doctor,
-                    { color: theme.icon, fontSize: FontsSize[fontSize] },
+                    { color: '#d72660', fontSize: FontsSize[fontSize] }, // SIEMPRE rosado fuerte
                   ]}
                 >
                   Doctor: {item.doctor}
@@ -166,7 +169,7 @@ export default function HomeScreen() {
                 <Text
                   style={[
                     styles.description,
-                    { color: theme.text, fontSize: FontsSize[fontSize] - 2 },
+                    { color: '#23272f', fontSize: FontsSize[fontSize] - 2 }, // SIEMPRE gris oscuro
                   ]}
                   numberOfLines={2}
                 >

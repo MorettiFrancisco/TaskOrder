@@ -3,13 +3,11 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import React, { useEffect, useMemo } from 'react';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ConfiguracionProvider } from './context/configuracionContext';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -19,26 +17,59 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
+    if (loaded) SplashScreen.hideAsync();
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
+  // Mueve useMemo antes del return
+  const theme = useMemo(() => {
+    if (colorScheme === 'dark') {
+      return {
+        ...DarkTheme,
+        colors: {
+          ...DarkTheme.colors,
+          primary:   '#ffb6d5',
+          card:      '#23272f',
+          border:    '#353945',
+          text:      '#fff',
+        }
+      };
+    } else {
+      return {
+        ...DefaultTheme,
+        colors: {
+          ...DefaultTheme.colors,
+          primary:   '#d72660',
+          card:      '#fff',
+          border:    '#eee',
+          text:      '#000',
+        }
+      };
+    }
+  }, [colorScheme]);
+
+  // Ahora sí, después de todos los hooks:
+  if (!loaded) return null;
 
   return (
     <ConfiguracionProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={theme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
-          <Stack.Screen name="functions/agregarFicha" options={{ title: 'Agregar Ficha' }} />
-          <Stack.Screen name="functions/modificarFicha" options={{ title: 'Modificar Ficha' }} />
-          <Stack.Screen name="singleFichaView" options={{ title: 'Visualizando Ficha' }} />
+          <Stack.Screen
+            name="functions/agregarFicha"
+            options={{ title: 'Agregar Ficha' }}
+          />
+          <Stack.Screen
+            name="functions/modificarFicha"
+            options={{ title: 'Modificar Ficha' }}
+          />
+          <Stack.Screen
+            name="singleFichaView"
+            options={{ title: 'Visualizando Ficha' }}
+          />
         </Stack>
-        <StatusBar style="auto" />
+        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
       </ThemeProvider>
     </ConfiguracionProvider>
   );

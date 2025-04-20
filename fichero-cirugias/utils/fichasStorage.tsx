@@ -80,20 +80,26 @@ export async function obtenerFichaPorTecnica(nombre: string): Promise<Ficha | nu
     return resultados.length > 0 ? resultados[0] : null;
 }
 
-// Editar una ficha por nombre de técnica
-export async function editarFichaPorTecnica(nombre: string, fichaEditada: Ficha) {
-    if (!validarFicha(fichaEditada)) throw new Error('Ficha inválida');
-    let fichas = await cargarFichas();
-    fichas = fichas.map(f =>
-        f.nombre_tecnica.trim().toLowerCase() === nombre.trim().toLowerCase() ? fichaEditada : f
-    );
-    await guardarFichas(fichas);
-}
-
 // Eliminar una ficha por id
 export async function eliminarFichaPorId(id: number) {
     if (typeof id !== 'number') throw new Error('ID inválido');
     let fichas = await cargarFichas();
     fichas = fichas.filter(f => f.id !== id);
+    await guardarFichas(fichas);
+}
+
+// Obtener una ficha por id
+export async function obtenerFichaPorId(id: number): Promise<Ficha | null> {
+    if (typeof id !== 'number') throw new Error('ID inválido');
+    const fichas = await cargarFichas();
+    const ficha = fichas.find(f => f.id === id);
+    return ficha || null;
+}
+
+// Editar una ficha por id
+export async function editarFichaPorId(id: number, fichaEditada: Ficha) {
+    if (!validarFicha(fichaEditada)) throw new Error('Ficha inválida');
+    let fichas = await cargarFichas();
+    fichas = fichas.map(f => f.id === id ? fichaEditada : f);
     await guardarFichas(fichas);
 }

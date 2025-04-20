@@ -4,7 +4,7 @@ class Tarjeta {
         public nombre_tecnica: string,
         public doctor: string,
         public descripcion: string,
-        public fecha: Date
+        public fecha: Date,
     ) {}
 }
 

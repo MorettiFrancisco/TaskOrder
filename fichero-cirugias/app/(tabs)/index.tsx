@@ -1,62 +1,277 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Button } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+  StatusBar,
+  SafeAreaView,
+} from 'react-native';
 import { useRouter } from 'expo-router';
-import { useFocusEffect } from '@react-navigation/native';
-import Ficha from '../../models/ficha';
-import { cargarFichas } from '../../utils/fichasStorage';
 import { useConfiguracion } from '../context/configuracionContext';
 import { Colors } from '../../constants/Colors';
 import { FontsSize } from '../../constants/FontsSize';
+import { cargarFichas } from '../../utils/fichasStorage';
+import Ficha from '../../models/ficha';
 
 export default function HomeScreen() {
-    const [fichas, setFichas] = useState<Ficha[]>([]);
-    const router = useRouter();
-    const { darkMode, fontSize } = useConfiguracion();
+  const [fichas, setFichas] = useState<Ficha[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
+  const { darkMode, fontSize } = useConfiguracion();
 
-    const fetchFichas = async () => {
-        const data = await cargarFichas();
-        setFichas(data);
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await cargarFichas();
+      setFichas(data);
     };
+    fetchData();
+  }, []);
 
-    useFocusEffect(
-        useCallback(() => {
-            fetchFichas();
-        }, [])
-    );
+  const backgroundColor = darkMode ? '#23272f' : '#fff';
+  const cardColor = darkMode ? '#353945' : '#ffe4ec';
+  const theme = darkMode ? Colors.dark : Colors.light;
 
-    const handleAgregar = () => {
-        router.push('/functions/agregarFicha');
-    };
+  const filteredFichas = fichas.filter(
+    (item) =>
+      item.nombre_tecnica.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.doctor.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-    const theme = darkMode ? Colors.dark : Colors.light;
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor }}>
+      <View
+        style={[
+          styles.safeContainer,
+          {
+            backgroundColor,
+            paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+          },
+        ]}
+      >
+        <StatusBar
+          barStyle={darkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={backgroundColor}
+        />
+        <View style={[styles.header, { backgroundColor }]}>
+          <Text style={[styles.appTitle, { color: darkMode ? '#fff' : '#d72660' }]}>
+            Fichero Cirugías
+          </Text>
+        </View>
 
-    return (
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
-          <Text style={[styles.title, { color: theme.text, fontSize: FontsSize[fontSize] + 4 }]}>Listado de Fichas</Text>
-          <Button title="Agregar Ficha" onPress={handleAgregar} color={theme.tint} />
-          <FlatList
-              data={fichas}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({ item }) => (
+        <View style={[styles.container]}>
+          {/* Search and Add Button Row */}
+          <View style={styles.searchRow}>
+            <View style={styles.searchBox}>
+              <TextInput
+                style={[
+                  styles.searchInput,
+                  {
+                    color: theme.text,
+                    borderColor: darkMode ? '#555' : '#ffb6d5',
+                    backgroundColor: darkMode ? '#2a2e37' : '#fff',
+                    fontSize: FontsSize[fontSize],
+                  },
+                ]}
+                placeholder="Buscar por técnica o doctor..."
+                placeholderTextColor={darkMode ? '#aaa' : '#d72660'}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                clearButtonMode="while-editing"
+              />
+            </View>
+            <TouchableOpacity
+              style={[
+                styles.addButton,
+                { backgroundColor: darkMode ? '#353945' : '#ffb6d5', marginLeft: 8 },
+              ]}
+              onPress={() => router.push('/functions/agregarFicha')}
+              activeOpacity={0.8}
+            >
+              <Text style={{ color: darkMode ? '#fff' : '#d72660', fontSize: 28, fontWeight: 'bold' }}>+</Text>
+            </TouchableOpacity>
+          </View>
+
+          {searchQuery.length > 0 && (
+            <View style={styles.suggestionsContainer}>
+              {[
+                ...fichas
+                  .filter(f =>
+                    f.nombre_tecnica.toLowerCase().startsWith(searchQuery.toLowerCase())
+                  )
+                  .map(f => f.nombre_tecnica),
+                ...fichas
+                  .filter(f =>
+                    f.doctor.toLowerCase().startsWith(searchQuery.toLowerCase())
+                  )
+                  .map(f => f.doctor),
+              ]
+                .filter((item, idx, arr) => arr.indexOf(item) === idx) // Evita duplicados
+                .filter(item => item.toLowerCase().startsWith(searchQuery.toLowerCase())) // Solo sugerencias que comiencen igual
+                .slice(0, 5)
+                .map((suggestion, idx) => (
                   <TouchableOpacity
-                      style={[styles.card, { backgroundColor: theme.tabIconDefault }]}
-                      onPress={() => router.push({ pathname: '/singleFichaView', params: { id: item.id } })}
+                    key={idx}
+                    onPress={() => setSearchQuery(suggestion)}
+                    style={styles.suggestionItem}
                   >
-                      <Text style={[styles.technique, { color: theme.text, fontSize: FontsSize[fontSize] }]}>{item.nombre_tecnica}</Text>
-                      <Text style={[styles.doctor, { color: theme.text, fontSize: FontsSize[fontSize] - 2 }]}>Doctor: {item.doctor}</Text>
-                      <Text style={[styles.description, { color: theme.icon, fontSize: FontsSize[fontSize] - 4 }]} numberOfLines={2}>{item.descripcion}</Text>
+                    <Text style={{ color: theme.text }}>{suggestion}</Text>
                   </TouchableOpacity>
-              )}
-          />     
+                ))}
+            </View>
+          )}
+
+          <FlatList
+            data={filteredFichas}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={{ paddingBottom: 24 }}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <Text style={{ color: theme.icon, textAlign: 'center', marginTop: 40 }}>
+                No hay fichas para mostrar.
+              </Text>
+            }
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.card,
+                  {
+                    backgroundColor: cardColor,
+                    shadowColor: darkMode ? '#000' : '#d72660',
+                    borderColor: darkMode ? '#2a2e37' : '#ffb6d5',
+                  },
+                ]}
+                activeOpacity={0.85}
+                onPress={() => router.push({ pathname: '/singleFichaView', params: { id: item.id } })}
+              >
+                <Text
+                  style={[
+                    styles.technique,
+                    { color: darkMode ? '#fff' : '#d72660', fontSize: FontsSize[fontSize] + 2 },
+                  ]}
+                >
+                  {item.nombre_tecnica}
+                </Text>
+                <Text
+                  style={[
+                    styles.doctor,
+                    { color: theme.icon, fontSize: FontsSize[fontSize] },
+                  ]}
+                >
+                  Doctor: {item.doctor}
+                </Text>
+                <Text
+                  style={[
+                    styles.description,
+                    { color: theme.text, fontSize: FontsSize[fontSize] - 2 },
+                  ]}
+                  numberOfLines={2}
+                >
+                  {item.descripcion}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
       </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  title: { fontWeight: 'bold', marginBottom: 16 },
-  card: { padding: 12, marginBottom: 12, borderRadius: 8 },
-  technique: { fontWeight: 'bold' },
-  doctor: {},
-  description: {},
+  safeContainer: {
+    flex: 1,
+  },
+  header: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  appTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    fontFamily: Platform.OS === 'ios' ? 'Arial Rounded MT Bold' : 'sans-serif-medium',
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 6,
+  },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+  searchBox: {
+    flex: 1,
+    borderRadius: 10,
+    overflow: 'hidden',
+    elevation: 1,
+  },
+  searchInput: {
+    borderWidth: 1.5,
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: '#fff',
+  },
+  addButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+  },
+  buttonText: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    letterSpacing: 1,
+  },
+  card: {
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 14,
+    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.13,
+    shadowRadius: 6,
+    borderWidth: 1,
+  },
+  technique: {
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  doctor: {
+    marginBottom: 2,
+  },
+  description: {
+    marginTop: 4,
+    lineHeight: 18,
+  },
+  suggestionsContainer: {
+    position: 'absolute',
+    top: 48,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    zIndex: 10,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    maxHeight: 150,
+    marginBottom: 10,
+  },
+  suggestionItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
 });

@@ -28,6 +28,10 @@ export default function HomeScreen() {
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   const backgroundColor = colorScheme === 'dark' ? '#23272f' : '#fff';
 
+  // Sugerencias: fondo y borde adaptados al tema
+  const suggestionsBg = colorScheme === 'dark' ? '#2a2e37' : '#fff';
+  const suggestionItemBorder = colorScheme === 'dark' ? '#353945' : '#eee';
+
   useFocusEffect(
     React.useCallback(() => {
       const fetchData = async () => {
@@ -99,7 +103,7 @@ export default function HomeScreen() {
           </View>
 
           {searchQuery.length > 0 && (
-            <View style={styles.suggestionsContainer}>
+            <View style={[styles.suggestionsContainer, { backgroundColor: suggestionsBg }]}>
               {[
                 ...fichas
                   .filter(f =>
@@ -119,7 +123,7 @@ export default function HomeScreen() {
                   <TouchableOpacity
                     key={idx}
                     onPress={() => setSearchQuery(suggestion)}
-                    style={styles.suggestionItem}
+                    style={[styles.suggestionItem, { borderBottomColor: suggestionItemBorder }]}
                   >
                     <Text style={{ color: theme.text }}>{suggestion}</Text>
                   </TouchableOpacity>
@@ -261,7 +265,6 @@ const styles = StyleSheet.create({
     top: 48,
     left: 0,
     right: 0,
-    backgroundColor: '#fff',
     borderRadius: 8,
     zIndex: 10,
     elevation: 4,
@@ -271,10 +274,11 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     maxHeight: 150,
     marginBottom: 10,
+    // backgroundColor: '#fff', // <-- eliminado, ahora se setea dinámicamente
   },
   suggestionItem: {
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    // borderBottomColor: '#eee', // <-- eliminado, ahora se setea dinámicamente
   },
 });

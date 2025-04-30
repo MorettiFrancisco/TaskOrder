@@ -91,7 +91,7 @@ export default function ConfigurationScreen() {
         </View>
         <View style={styles.footer}>
           <Text style={{ color: theme.icon, fontSize: 13, opacity: 0.7, textAlign: 'center' }}>
-            TaskOrder v1.0 • Hecho con ❤️
+            TaskOrder v1.1 • Hecho con ❤️
           </Text>
         </View>
       </ScrollView>

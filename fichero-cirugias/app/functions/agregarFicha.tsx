@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+import React, { useState, useCallback, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, BackHandler } from 'react-native';
+import { useRouter, useNavigation } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { agregarFicha, existeFichaPorTecnica, obtenerFichaPorTecnica } from '../../utils/fichasStorage';
 import Ficha from '../../models/ficha';
 import { useColorScheme } from 'react-native';
@@ -10,19 +11,108 @@ export default function AgregarFichaScreen() {
     const [doctor, setDoctor] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const router = useRouter();
+    const navigation = useNavigation();
     const colorScheme = useColorScheme();
+
     const backgroundColor = colorScheme === 'dark' ? '#23272f' : '#fff';
     const textColor = colorScheme === 'dark' ? '#fff' : '#23272f';
     const inputBg = colorScheme === 'dark' ? '#2a2e37' : '#f9f9f9';
     const borderColor = colorScheme === 'dark' ? '#555' : '#ccc';
-    const buttonBg = colorScheme === 'dark' ? '#d72660' : '#d72660';
+    const buttonBg = '#d72660';
     const buttonText = '#fff';
 
+    // Flags para manejar alertas y navegación
+    const alertVisible = useRef(false);
+    const confirmedExit = useRef(false);
+
+    /**
+     * Muestra alerta de confirmación si hay datos ingresados.
+     * Retorna true si bloquea la navegación (alerta en pantalla), false si permite continuar.
+     */
+    const confirmExit = useCallback((onConfirm?: () => void) => {
+        if (alertVisible.current) {
+            return true; // Ya mostrando alerta, bloquea navegación
+        }
+        if (confirmedExit.current) {
+            return false; // Confirmación previa, permite navegación
+        }
+        if (nombreTecnica || doctor || descripcion) {
+            alertVisible.current = true;
+            Alert.alert(
+                'Cancelar',
+                '¿Seguro que deseas cancelar? Se perderán los datos ingresados.',
+                [
+                    {
+                        text: 'No',
+                        style: 'cancel',
+                        onPress: () => { alertVisible.current = false; }
+                    },
+                    {
+                        text: 'Sí',
+                        style: 'destructive',
+                        onPress: () => {
+                            alertVisible.current = false;
+                            confirmedExit.current = true;
+                            if (onConfirm) {
+                                onConfirm();
+                            } else {
+                                router.replace('/');
+                            }
+                        }
+                    }
+                ],
+                { cancelable: false }
+            );
+            return true;
+        }
+        return false; // Sin datos, no bloquea
+    }, [nombreTecnica, doctor, descripcion, router]);
+
+    // Manejo de botón físico y flecha de back
+    useFocusEffect(
+        useCallback(() => {
+            alertVisible.current = false;
+            confirmedExit.current = false;
+
+            const onBackPress = () => {
+                // Si retorna true, bloquea el back y muestra alerta
+                if (confirmExit(() => {
+                    confirmedExit.current = true;
+                    router.replace('/');
+                })) {
+                    return true;
+                }
+                return false; // Permite back si no hay datos
+            };
+
+            BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+            const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+                // Si confirmExit retorna true, se bloquea y muestra alerta
+                if (confirmExit(() => {
+                    confirmedExit.current = true;
+                    navigation.dispatch(e.data.action);
+                })) {
+                    e.preventDefault();
+                }
+            });
+
+            return () => {
+                BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+                unsubscribe();
+                alertVisible.current = false;
+                confirmedExit.current = false;
+            };
+        }, [confirmExit, navigation, router])
+    );
+
+    // Manejo de guardar ficha
     const handleGuardar = async () => {
         if (!nombreTecnica.trim() || !doctor.trim() || !descripcion.trim()) {
             Alert.alert('Error', 'Todos los campos son obligatorios.');
             return;
         }
+
         if (await existeFichaPorTecnica(nombreTecnica)) {
             const fichaExistente = await obtenerFichaPorTecnica(nombreTecnica);
             const doctorExistente = fichaExistente ? fichaExistente.doctor : 'Desconocido';
@@ -44,7 +134,13 @@ export default function AgregarFichaScreen() {
                             );
                             await agregarFicha(nuevaFicha);
                             Alert.alert('Éxito', 'Ficha agregada correctamente.', [
-                                { text: 'OK', onPress: () => router.back() }
+                                {
+                                    text: 'OK',
+                                    onPress: () => {
+                                        confirmedExit.current = true;
+                                        router.back();
+                                    }
+                                }
                             ]);
                         }
                     }
@@ -52,6 +148,7 @@ export default function AgregarFichaScreen() {
             );
             return;
         }
+
         const nuevaFicha = new Ficha(
             Date.now(),
             nombreTecnica.trim(),
@@ -61,13 +158,19 @@ export default function AgregarFichaScreen() {
         );
         await agregarFicha(nuevaFicha);
         Alert.alert('Éxito', 'Ficha agregada correctamente.', [
-            { text: 'OK', onPress: () => router.back() }
+            {
+                text: 'OK',
+                onPress: () => {
+                    confirmedExit.current = true;
+                    router.back();
+                }
+            }
         ]);
     };
 
     return (
-        <ScrollView contentContainerStyle={[styles.container, { backgroundColor }]}>
-            <View style={[styles.form, { backgroundColor: colorScheme === 'dark' ? '#292d36' : '#fff', borderColor }]}>
+        <ScrollView contentContainerStyle={[styles.container, { backgroundColor }]}>            
+            <View style={[styles.form, { backgroundColor: colorScheme === 'dark' ? '#292d36' : '#fff', borderColor }]}>                
                 <Text style={[styles.title, { color: textColor }]}>Agregar Ficha</Text>
                 <Text style={[styles.label, { color: textColor }]}>Nombre de la Técnica</Text>
                 <TextInput

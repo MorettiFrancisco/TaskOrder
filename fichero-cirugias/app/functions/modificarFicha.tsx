@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator, BackHandler } from 'react-native';
+import { useRouter, useLocalSearchParams, useNavigation } from 'expo-router';
 import { obtenerFichaPorId, editarFichaPorId } from '../../utils/fichasStorage';
 import Ficha from '../../models/ficha';
 import { useColorScheme } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function ModificarFichaScreen() {
     const router = useRouter();
+    const navigation = useNavigation();
     const { id } = useLocalSearchParams<{ id: string }>();
     const [nombreTecnica, setNombreTecnica] = useState('');
     const [doctor, setDoctor] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [loading, setLoading] = useState(true);
+    const [original, setOriginal] = useState({ nombreTecnica: '', doctor: '', descripcion: '' });
     const colorScheme = useColorScheme();
     const backgroundColor = colorScheme === 'dark' ? '#23272f' : '#fff';
     const textColor = colorScheme === 'dark' ? '#fff' : '#23272f';
@@ -19,6 +22,95 @@ export default function ModificarFichaScreen() {
     const borderColor = colorScheme === 'dark' ? '#555' : '#ccc';
     const buttonBg = colorScheme === 'dark' ? '#d72660' : '#d72660';
     const buttonText = '#fff';
+
+    // Flags para manejar alertas y navegación
+    const alertVisible = useRef(false);
+    const confirmedExit = useRef(false);
+    const justSaved = useRef(false);
+
+    // Confirmación al salir
+    const confirmExit = useCallback((onConfirm?: () => void) => {
+        if (justSaved.current) return false;
+        if (
+            nombreTecnica === original.nombreTecnica &&
+            doctor === original.doctor &&
+            descripcion === original.descripcion
+        ) {
+            if (onConfirm) onConfirm();
+            else router.replace({ pathname: '/singleFichaView', params: { id } });
+            return false;
+        }
+        // Si hay cambios, muestra alerta
+        if (alertVisible.current) return true;
+        if (confirmedExit.current) return false;
+        if (nombreTecnica || doctor || descripcion) {
+            alertVisible.current = true;
+            Alert.alert(
+                'Cancelar',
+                '¿Seguro que deseas cancelar? Se perderán los cambios realizados.',
+                [
+                    {
+                        text: 'No',
+                        style: 'cancel',
+                        onPress: () => { alertVisible.current = false; }
+                    },
+                    {
+                        text: 'Sí',
+                        style: 'destructive',
+                        onPress: () => {
+                            alertVisible.current = false;
+                            confirmedExit.current = true;
+                            if (onConfirm) {
+                                onConfirm();
+                            } else {
+                                router.replace({ pathname: '/singleFichaView', params: { id } });
+                            }
+                        }
+                    }
+                ],
+                { cancelable: false }
+            );
+            return true;
+        }
+        return false;
+    }, [nombreTecnica, doctor, descripcion, original, router, id]);
+
+    // Manejo de botón físico y flecha de back
+    useFocusEffect(
+        useCallback(() => {
+            alertVisible.current = false;
+            confirmedExit.current = false;
+
+            const onBackPress = () => {
+                if (confirmExit(() => {
+                    confirmedExit.current = true;
+                    router.replace({ pathname: '/singleFichaView', params: { id } });
+                })) {
+                    return true;
+                }
+                return false;
+            };
+
+            BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+            const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+                if (confirmExit(() => {
+                    confirmedExit.current = true;
+                    navigation.dispatch(e.data.action);
+                })) {
+                    e.preventDefault();
+                }
+            });
+
+            return () => {
+                BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+                unsubscribe();
+                alertVisible.current = false;
+                confirmedExit.current = false;
+                justSaved.current = false; // <--- Limpia la bandera
+            };
+        }, [confirmExit, navigation, router, id])
+    );
 
     useEffect(() => {
         async function cargarFicha() {
@@ -28,6 +120,11 @@ export default function ModificarFichaScreen() {
                     setNombreTecnica(ficha.nombre_tecnica);
                     setDoctor(ficha.doctor);
                     setDescripcion(ficha.descripcion);
+                    setOriginal({
+                        nombreTecnica: ficha.nombre_tecnica,
+                        doctor: ficha.doctor,
+                        descripcion: ficha.descripcion,
+                    });
                 } else {
                     Alert.alert('Error', 'Ficha no encontrada.', [
                         { text: 'OK', onPress: () => router.back() }
@@ -52,6 +149,7 @@ export default function ModificarFichaScreen() {
             new Date()
         );
         await editarFichaPorId(Number(id), fichaEditada);
+        justSaved.current = true;
         Alert.alert('Éxito', 'Ficha modificada correctamente.', [
             { text: 'OK', onPress: () => router.replace({ pathname: '/singleFichaView', params: { id } }) }
         ]);

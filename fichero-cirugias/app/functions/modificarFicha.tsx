@@ -36,8 +36,11 @@ export default function ModificarFichaScreen() {
             doctor === original.doctor &&
             descripcion === original.descripcion
         ) {
-            if (onConfirm) onConfirm();
-            else router.replace({ pathname: '/singleFichaView', params: { id } });
+            if (onConfirm) {
+                onConfirm();
+            } else {
+                router.back();
+            }
             return false;
         }
         // Si hay cambios, muestra alerta
@@ -63,7 +66,7 @@ export default function ModificarFichaScreen() {
                             if (onConfirm) {
                                 onConfirm();
                             } else {
-                                router.replace({ pathname: '/singleFichaView', params: { id } });
+                                router.back();
                             }
                         }
                     }
@@ -84,7 +87,7 @@ export default function ModificarFichaScreen() {
             const onBackPress = () => {
                 if (confirmExit(() => {
                     confirmedExit.current = true;
-                    router.replace({ pathname: '/singleFichaView', params: { id } });
+                    router.back(); 
                 })) {
                     return true;
                 }
@@ -151,7 +154,7 @@ export default function ModificarFichaScreen() {
         await editarFichaPorId(Number(id), fichaEditada);
         justSaved.current = true;
         Alert.alert('Éxito', 'Ficha modificada correctamente.', [
-            { text: 'OK', onPress: () => router.replace({ pathname: '/singleFichaView', params: { id } }) }
+            { text: 'OK', onPress: () => router.back() }
         ]);
     };
 

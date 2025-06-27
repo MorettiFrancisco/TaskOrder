@@ -1,11 +1,11 @@
-class Tarjeta {
-    constructor(
-        public id: number,
-        public nombre_tecnica: string,
-        public doctor: string,
-        public descripcion: string,
-        public fecha: Date,
-    ) {}
+class Ficha {
+  constructor(
+    public id: number,
+    public nombre_tecnica: string,
+    public doctor: string,
+    public descripcion: string,
+    public materiales: string
+  ) {}
 }
 
-export default Tarjeta;
+export default Ficha;

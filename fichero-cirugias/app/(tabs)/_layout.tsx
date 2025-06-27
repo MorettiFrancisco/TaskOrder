@@ -1,18 +1,18 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Tabs } from "expo-router";
+import React from "react";
+import { Platform } from "react-native";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { HapticTab } from "@/components/HapticTab";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   // Colores personalizados para la tab bar
-  const activeColor = colorScheme === 'dark' ? '#ffb6d5' : '#d72660';
-  const inactiveColor = colorScheme === 'dark' ? '#aaa' : '#bbb';
-  const tabBarBg = colorScheme === 'dark' ? '#23272f' : '#fff';
+  const activeColor = colorScheme === "dark" ? "#ffb6d5" : "#d72660";
+  const inactiveColor = colorScheme === "dark" ? "#aaa" : "#bbb";
+  const tabBarBg = colorScheme === "dark" ? "#23272f" : "#fff";
 
   return (
     <Tabs
@@ -23,14 +23,14 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
         tabBarStyle: Platform.select({
           ios: {
-            position: 'absolute',
+            position: "absolute",
             backgroundColor: tabBarBg,
-            borderTopColor: colorScheme === 'dark' ? '#353945' : '#eee',
+            borderTopColor: colorScheme === "dark" ? "#353945" : "#eee",
             opacity: 1,
           },
           default: {
             backgroundColor: tabBarBg,
-            borderTopColor: colorScheme === 'dark' ? '#353945' : '#eee',
+            borderTopColor: colorScheme === "dark" ? "#353945" : "#eee",
           },
         }),
       }}
@@ -38,17 +38,26 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => (
+          title: "Home",
+          tabBarIcon: ({ color }: { color: string }) => (
             <IconSymbol size={28} name="house.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="payment"
+        options={{
+          title: "Pagos",
+          tabBarIcon: ({ color }: { color: string }) => (
+            <AntDesign name="creditcard" size={28} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="configuration"
         options={{
-          title: 'Configuración',
-          tabBarIcon: ({ color }) => (
+          title: "Configuración",
+          tabBarIcon: ({ color }: { color: string }) => (
             <AntDesign name="setting" size={28} color={color} />
           ),
         }}

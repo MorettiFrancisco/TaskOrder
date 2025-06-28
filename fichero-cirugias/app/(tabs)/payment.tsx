@@ -558,7 +558,7 @@ export default function PaymentScreen() {
           onPress={handleAddPayment}
           activeOpacity={0.8}
         >
-          <Ionicons name="add" size={30} color="#fff" />
+          <Ionicons name="add" size={30} color={theme.background} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: Colors.light.gray200,
     minHeight: 60,
     maxHeight: 80,
     marginTop: Platform.OS === "android" ? 10 : 0,
@@ -614,7 +614,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: Colors.light.black,
     shadowOpacity: 0.1,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -672,7 +672,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     borderWidth: 1,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: Colors.light.black,
     shadowOpacity: 0.1,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: Colors.light.black,
     shadowOpacity: 0.1,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -724,7 +724,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     elevation: 3,
-    shadowColor: "#000",
+    shadowColor: Colors.light.black,
     shadowOpacity: 0.13,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
@@ -746,7 +746,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   statusText: {
-    color: "#fff",
+    color: Colors.light.white,
     fontSize: 12,
     fontWeight: "bold",
   },
@@ -766,7 +766,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   paymentButtonText: {
-    color: "#fff",
+    color: Colors.light.white,
     fontWeight: "bold",
     fontSize: 14,
   },
@@ -794,7 +794,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     backgroundColor: Colors.light.tint,
     elevation: 8,
-    shadowColor: "#000",
+    shadowColor: Colors.light.black,
     shadowOpacity: 0.3,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },

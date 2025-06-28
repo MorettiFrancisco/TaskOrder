@@ -11,6 +11,7 @@ import React, { useEffect, useMemo } from "react";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { ConfiguracionProvider } from "./context/configuracionContext";
+import { Colors } from "@/constants/Colors";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -31,10 +32,10 @@ export default function RootLayout() {
         ...DarkTheme,
         colors: {
           ...DarkTheme.colors,
-          primary: "#ffb6d5",
-          card: "#23272f",
-          border: "#353945",
-          text: "#fff",
+          primary: Colors.dark.pink200,
+          card: Colors.dark.background,
+          border: Colors.dark.border,
+          text: Colors.dark.text,
         },
       };
     } else {
@@ -42,10 +43,10 @@ export default function RootLayout() {
         ...DefaultTheme,
         colors: {
           ...DefaultTheme.colors,
-          primary: "#d72660",
-          card: "#fff",
-          border: "#eee",
-          text: "#000",
+          primary: Colors.light.pink600,
+          card: Colors.light.background,
+          border: Colors.light.border,
+          text: Colors.light.text,
         },
       };
     }
@@ -70,6 +71,14 @@ export default function RootLayout() {
         <Stack.Screen
           name="singleFichaView"
           options={{ title: "Visualizando Ficha" }}
+        />
+        <Stack.Screen
+          name="functions/modificarPago"
+          options={{ title: "Modificar Pago" }}
+        />
+        <Stack.Screen
+          name="functions/agregarPago"
+          options={{ title: "Agregar Pago" }}
         />
       </Stack>
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />

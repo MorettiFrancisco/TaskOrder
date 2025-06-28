@@ -29,23 +29,59 @@ export const Colors = {
     muted: "#6b7280", // Gris medio para texto secundario (4.6:1)
     border: "#d1d5db", // Gris claro para bordes
     cardBorder: "#ffb6d5", // ROSADO CLARO para bordes de tarjetas
+    // Colores adicionales para consistencia
+    white: "#ffffff", // Blanco puro
+    black: "#000000", // Negro para sombras
+    gray100: "#f3f4f6", // Gris muy claro
+    gray200: "#e5e7eb", // Gris claro para bordes secundarios
+    gray300: "#d1d5db", // Gris medio-claro
+    gray400: "#9ca3af", // Gris medio
+    gray500: "#6b7280", // Gris medio-oscuro
+    gray900: "#1a1d23", // Gris muy oscuro para texto
+    pink50: "#fff0f5", // Rosa muy claro para fondos
+    pink100: "#ffe4ec", // Rosa claro para cards
+    pink200: "#ffb6d5", // Rosa medio para bordes
+    pink600: "#d72660", // Rosa fuerte principal
+    pink700: "#c41e3a", // Rosa oscuro
+    green600: "#059669", // Verde success
+    orange600: "#d97706", // Naranja warning
+    red600: "#dc2626", // Rojo danger/error
+    orange500: "#ea580c", // Naranja para pending
   },
   dark: {
-    text: "#e5e7eb", // Gris claro suave, menos agresivo que blanco puro
-    background: "#0f172a", // Azul muy oscuro, mejor para uso nocturno
-    tint: tintColorDark, // Rosado suave para modo nocturno
-    icon: "#ff8fa3", // Rosado suave para íconos
-    tabIconDefault: "#6b7280", // Gris más oscuro para menos contraste
-    tabIconSelected: tintColorDark,
-    card: "#1e293b", // Gris azulado oscuro para tarjetas, más suave que rosado
-    // Colores de estado optimizados para uso nocturno
-    success: "#22c55e", // Verde más suave para dark mode
-    warning: "#f59e0b", // Amarillo-naranja suave
-    danger: "#ef4444", // Rojo suave
-    pending: "#fb7185", // Rosa suave para pendientes
-    paid: "#22c55e", // Verde suave para pagados
-    muted: "#9ca3af", // Gris medio para texto secundario
-    border: "#334155", // Gris azulado para bordes
-    cardBorder: "#475569", // Gris azulado más claro para bordes de tarjetas
+    text: "#1a1d23", // Gris más oscuro para mejor contraste (7.8:1)
+    background: "#fff", // Fondo blanco
+    tint: tintColorLight, // Rosado oscuro para mejor contraste
+    icon: "#c41e3a", // Rosado oscuro para íconos
+    tabIconDefault: "#9ca3af", // Gris medio para mejor contraste
+    tabIconSelected: tintColorLight,
+    card: "#ffe4ec", // ROSADO CLARO ORIGINAL para tarjetas
+    // Colores de estado mejorados para accesibilidad
+    success: "#059669", // Verde más oscuro (5.4:1 contraste)
+    warning: "#d97706", // Naranja más oscuro (4.6:1 contraste)
+    danger: "#dc2626", // Rojo más oscuro (5.9:1 contraste)
+    pending: "#ea580c", // Naranja-rojo para pendientes (4.8:1 contraste)
+    paid: "#059669", // Verde oscuro para pagados (5.4:1 contraste)
+    muted: "#6b7280", // Gris medio para texto secundario (4.6:1)
+    border: "#d1d5db", // Gris claro para bordes
+    cardBorder: "#ffb6d5", // ROSADO CLARO para bordes de tarjetas
+    // Colores adicionales para consistencia (idénticos al modo claro)
+    white: "#ffffff", // Blanco puro
+    black: "#000000", // Negro para sombras
+    gray100: "#f3f4f6", // Gris muy claro
+    gray200: "#e5e7eb", // Gris claro para bordes secundarios
+    gray300: "#d1d5db", // Gris medio-claro
+    gray400: "#9ca3af", // Gris medio
+    gray500: "#6b7280", // Gris medio-oscuro
+    gray900: "#1a1d23", // Gris muy oscuro para texto
+    pink50: "#fff0f5", // Rosa muy claro para fondos
+    pink100: "#ffe4ec", // Rosa claro para cards
+    pink200: "#ffb6d5", // Rosa medio para bordes
+    pink600: "#d72660", // Rosa fuerte principal
+    pink700: "#c41e3a", // Rosa oscuro
+    green600: "#059669", // Verde success
+    orange600: "#d97706", // Naranja warning
+    red600: "#dc2626", // Rojo danger/error
+    orange500: "#ea580c", // Naranja para pending
   },
 };

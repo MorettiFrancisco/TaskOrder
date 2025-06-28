@@ -27,10 +27,12 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
   const backgroundColor = theme.background;
-
-  // Sugerencias: fondo y borde adaptados al tema
   const suggestionsBg = theme.card;
   const suggestionItemBorder = theme.cardBorder;
+
+  const fontMain = FontsSize[fontSize];
+  const fontBig = fontMain + 2;
+  const fontSmall = fontMain - 2;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -46,6 +48,41 @@ export default function HomeScreen() {
     (item) =>
       item.nombre_tecnica.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.doctor.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const renderFicha = ({ item }: { item: Ficha }) => (
+    <TouchableOpacity
+      style={[
+        styles.card,
+        {
+          backgroundColor: theme.card,
+          shadowColor: theme.tint,
+          borderColor: theme.border,
+        },
+      ]}
+      activeOpacity={0.85}
+      onPress={() =>
+        router.push({
+          pathname: "/singleFichaView",
+          params: { id: item.id },
+        })
+      }
+    >
+      <Text
+        style={[styles.technique, { color: theme.tint, fontSize: fontBig }]}
+      >
+        {item.nombre_tecnica}
+      </Text>
+      <Text style={[styles.doctor, { color: theme.text, fontSize: fontMain }]}>
+        Doctor: {item.doctor}
+      </Text>
+      <Text
+        style={[styles.description, { color: theme.text, fontSize: fontSmall }]}
+        numberOfLines={2}
+      >
+        {item.descripcion}
+      </Text>
+    </TouchableOpacity>
   );
 
   return (
@@ -69,8 +106,7 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-        <View style={[styles.container]}>
-          {/* Search and Add Button Row */}
+        <View style={styles.container}>
           <View style={styles.searchRow}>
             <View style={styles.searchBox}>
               <TextInput
@@ -80,7 +116,7 @@ export default function HomeScreen() {
                     color: theme.text,
                     borderColor: theme.tint,
                     backgroundColor: theme.card,
-                    fontSize: FontsSize[fontSize],
+                    fontSize: fontMain,
                   },
                 ]}
                 placeholder="Buscar por técnica o doctor..."
@@ -98,7 +134,13 @@ export default function HomeScreen() {
               onPress={() => router.push("/functions/agregarFicha")}
               activeOpacity={0.8}
             >
-              <Text style={{ color: "#fff", fontSize: 28, fontWeight: "bold" }}>
+              <Text
+                style={{
+                  color: theme.background,
+                  fontSize: 28,
+                  fontWeight: "bold",
+                }}
+              >
                 +
               </Text>
             </TouchableOpacity>
@@ -113,42 +155,31 @@ export default function HomeScreen() {
             >
               {[
                 ...fichas
-                  .filter((f) =>
-                    f.nombre_tecnica
-                      .toLowerCase()
-                      .startsWith(searchQuery.toLowerCase())
+                  .flatMap((f) => [f.nombre_tecnica, f.doctor])
+                  .filter((item) =>
+                    item.toLowerCase().startsWith(searchQuery.toLowerCase())
                   )
-                  .map((f) => f.nombre_tecnica),
-                ...fichas
-                  .filter((f) =>
-                    f.doctor.toLowerCase().startsWith(searchQuery.toLowerCase())
-                  )
-                  .map((f) => f.doctor),
-              ]
-                .filter((item, idx, arr) => arr.indexOf(item) === idx) // Evita duplicados
-                .filter((item) =>
-                  item.toLowerCase().startsWith(searchQuery.toLowerCase())
-                ) // Solo sugerencias que comiencen igual
-                .slice(0, 5)
-                .map((suggestion, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    onPress={() => setSearchQuery(suggestion)}
-                    style={[
-                      styles.suggestionItem,
-                      { borderBottomColor: suggestionItemBorder },
-                    ]}
-                  >
-                    <Text style={{ color: theme.text }}>{suggestion}</Text>
-                  </TouchableOpacity>
-                ))}
+                  .filter((item, idx, arr) => arr.indexOf(item) === idx)
+                  .slice(0, 5),
+              ].map((suggestion, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  onPress={() => setSearchQuery(suggestion)}
+                  style={[
+                    styles.suggestionItem,
+                    { borderBottomColor: suggestionItemBorder },
+                  ]}
+                >
+                  <Text style={{ color: theme.text }}>{suggestion}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           )}
 
           <FlatList
             data={filteredFichas}
             keyExtractor={(item) => item.id.toString()}
-            contentContainerStyle={{ paddingBottom: 24 }}
+            contentContainerStyle={{ paddingBottom: 100 }}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <Text
@@ -161,51 +192,7 @@ export default function HomeScreen() {
                 No hay fichas para mostrar.
               </Text>
             }
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.card,
-                  {
-                    backgroundColor: theme.card,
-                    shadowColor: theme.tint,
-                    borderColor: theme.border,
-                  },
-                ]}
-                activeOpacity={0.85}
-                onPress={() =>
-                  router.push({
-                    pathname: "/singleFichaView",
-                    params: { id: item.id },
-                  })
-                }
-              >
-                <Text
-                  style={[
-                    styles.technique,
-                    { color: theme.tint, fontSize: FontsSize[fontSize] + 2 },
-                  ]}
-                >
-                  {item.nombre_tecnica}
-                </Text>
-                <Text
-                  style={[
-                    styles.doctor,
-                    { color: theme.text, fontSize: FontsSize[fontSize] }, // Usar color del tema
-                  ]}
-                >
-                  Doctor: {item.doctor}
-                </Text>
-                <Text
-                  style={[
-                    styles.description,
-                    { color: theme.text, fontSize: FontsSize[fontSize] - 2 }, // Usar color del tema
-                  ]}
-                  numberOfLines={2}
-                >
-                  {item.descripcion}
-                </Text>
-              </TouchableOpacity>
-            )}
+            renderItem={renderFicha}
           />
         </View>
       </View>
@@ -221,7 +208,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: Colors.light.gray200,
   },
   appTitle: {
     fontSize: 28,
@@ -250,7 +237,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderRadius: 10,
     padding: 10,
-    backgroundColor: "#fff",
   },
   addButton: {
     width: 44,
@@ -259,11 +245,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     elevation: 2,
-  },
-  buttonText: {
-    fontWeight: "bold",
-    fontSize: 16,
-    letterSpacing: 1,
   },
   card: {
     borderRadius: 14,
@@ -294,17 +275,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     zIndex: 10,
     elevation: 4,
-    shadowColor: "#000",
+    shadowColor: Colors.light.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     maxHeight: 150,
     marginBottom: 10,
-    // backgroundColor: '#fff', // <-- eliminado, ahora se setea dinámicamente
   },
   suggestionItem: {
     padding: 10,
     borderBottomWidth: 1,
-    // borderBottomColor: '#eee', // <-- eliminado, ahora se setea dinámicamente
   },
 });

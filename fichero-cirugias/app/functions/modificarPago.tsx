@@ -39,11 +39,6 @@ export default function ModificarPagoScreen() {
   const { fontSize } = useConfiguracion();
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
-  const backgroundColor = theme.background;
-
-  // Card background colors consistent with other screens
-  const cardBg = theme.card;
-  const borderColor = theme.cardBorder;
 
   useEffect(() => {
     loadPaymentData();
@@ -158,7 +153,9 @@ export default function ModificarPagoScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor }]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.background }]}
+      >
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.tint} />
           <Text
@@ -176,7 +173,9 @@ export default function ModificarPagoScreen() {
 
   if (!payment || !ficha) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor }]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.background }]}
+      >
         <View style={styles.errorContainer}>
           <Text
             style={[
@@ -198,34 +197,14 @@ export default function ModificarPagoScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <StatusBar
         barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={backgroundColor}
+        backgroundColor={theme.background}
       />
 
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor }]}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.push("/(tabs)/payment")}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="arrow-back" size={24} color={theme.tint} />
-        </TouchableOpacity>
-        <Text
-          style={[
-            styles.headerText,
-            { color: theme.tint, fontSize: FontsSize[fontSize] + 4 },
-          ]}
-        >
-          Modificar Pago
-        </Text>
-        <View style={styles.headerSpacer} />
-      </View>
-
       <ScrollView
-        style={{ flex: 1, backgroundColor }}
+        style={{ flex: 1, backgroundColor: theme.background }}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
@@ -234,8 +213,8 @@ export default function ModificarPagoScreen() {
           style={[
             styles.card,
             {
-              backgroundColor: cardBg,
-              borderColor: borderColor,
+              backgroundColor: theme.card,
+              borderColor: theme.cardBorder,
             },
           ]}
         >
@@ -339,8 +318,8 @@ export default function ModificarPagoScreen() {
           style={[
             styles.card,
             {
-              backgroundColor: cardBg,
-              borderColor: borderColor,
+              backgroundColor: theme.card,
+              borderColor: theme.cardBorder,
             },
           ]}
         >
@@ -429,10 +408,10 @@ export default function ModificarPagoScreen() {
               activeOpacity={0.8}
             >
               {saving ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" color={theme.white} />
               ) : (
                 <>
-                  <Ionicons name="checkmark" size={20} color="#fff" />
+                  <Ionicons name="checkmark" size={20} color={theme.white} />
                   <Text
                     style={[
                       styles.buttonText,
@@ -457,7 +436,7 @@ export default function ModificarPagoScreen() {
             disabled={saving}
             activeOpacity={0.8}
           >
-            <Ionicons name="trash" size={20} color="#fff" />
+            <Ionicons name="trash" size={20} color={theme.white} />
             <Text
               style={[styles.buttonText, { fontSize: FontsSize[fontSize] }]}
             >
@@ -476,7 +455,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
   header: {
     flexDirection: "row",
@@ -484,7 +463,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: Colors.light.border,
   },
   backButton: {
     padding: 8,
@@ -505,7 +484,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: Colors.light.black,
     shadowOpacity: 0.1,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -536,7 +515,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   statusText: {
-    color: "#fff",
+    color: Colors.light.white,
     fontSize: 12,
     fontWeight: "bold",
   },
@@ -578,7 +557,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   buttonText: {
-    color: "#fff",
+    color: Colors.light.white,
     fontWeight: "bold",
   },
   loadingContainer: {

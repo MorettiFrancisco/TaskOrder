@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -13,11 +13,7 @@ import {
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { cargarFichas } from "../../utils/fichasStorage";
-import {
-  cargarPagos,
-  agregarPago,
-  actualizarPago,
-} from "../../utils/paymentsStorage";
+import { agregarPago, cargarPagos } from "../../utils/paymentsStorage";
 import { formatCurrencyInput, parseCurrency } from "./formatCurrency";
 import Ficha from "../../models/ficha";
 import Payment from "../../models/payment";
@@ -49,7 +45,6 @@ export default function AgregarPagoScreen() {
   const colorScheme = useColorScheme();
   const { fontSize } = useConfiguracion();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
-  const backgroundColor = theme.background;
 
   useFocusEffect(
     useCallback(() => {
@@ -67,30 +62,27 @@ export default function AgregarPagoScreen() {
     }, [])
   );
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setDoctor("");
     setPaymentSource("patient");
     setPaymentStatus("pending");
     setAmount("");
     setNotes("");
     setSelectedFicha(null);
-  };
+  }, []);
 
-  const handleAmountChange = (text: string) => {
-    // Format input as user types for currency
+  const handleAmountChange = useCallback((text: string) => {
     const formatted = formatCurrencyInput(text);
     setAmount(formatted);
-  };
+  }, []);
 
-  const handleSelectFicha = (ficha: Ficha) => {
+  const handleSelectFicha = useCallback((ficha: Ficha) => {
     setSelectedFicha(ficha);
     setFichaModalVisible(false);
     setModalVisible(true);
-    // Opcionalmente limpiar la búsqueda
-    // setSearchQuery("");
-  };
+  }, []);
 
-  const handleSavePayment = async () => {
+  const handleSavePayment = useCallback(async () => {
     if (!selectedFicha) {
       Alert.alert("Error", "Debe seleccionar una cirugía");
       return;
@@ -118,12 +110,10 @@ export default function AgregarPagoScreen() {
     }
 
     try {
-      const existingPayment = pagos.find((p) => p.fichaId === selectedFicha.id);
       const paymentAmount =
         paymentSource === "patient" ? parseCurrency(amount) : undefined;
       const currentDate = new Date();
 
-      // Always create new payment (multiple payments allowed per ficha)
       const newPayment = new Payment(
         Date.now(),
         selectedFicha.id,
@@ -142,41 +132,38 @@ export default function AgregarPagoScreen() {
       setModalVisible(false);
       resetForm();
 
-      // Navigate back to payment screen
       router.push("/(tabs)/payment");
     } catch (error) {
       Alert.alert("Error", "No se pudo guardar el pago");
     }
-  };
+  }, [
+    selectedFicha,
+    doctor,
+    paymentSource,
+    amount,
+    paymentStatus,
+    notes,
+    resetForm,
+    router,
+  ]);
 
-  const getAllFichas = () => {
-    return fichas; // Mostrar todas las fichas, ya que pueden tener múltiples pagos
-  };
-
-  const getFilteredFichas = () => {
+  const filteredFichas = useMemo(() => {
     if (!searchQuery.trim()) {
-      return getAllFichas();
+      return fichas;
     }
-
-    return getAllFichas().filter((ficha) =>
+    return fichas.filter((ficha) =>
       ficha.nombre_tecnica.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  };
+  }, [fichas, searchQuery]);
+
+  const commonTextStyle = { color: theme.text, fontSize: FontsSize[fontSize] };
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
-      <View style={[styles.header, { backgroundColor }]}>
-        <Text
-          style={[
-            styles.headerText,
-            { color: theme.tint, fontSize: FontsSize[fontSize] + 6 },
-          ]}
-        >
-          💰 Gestionar Pagos
-        </Text>
-      </View>
-
-      <ScrollView style={styles.content}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
+      >
         {/* Search Box */}
         <View style={styles.searchContainer}>
           <TextInput
@@ -190,7 +177,7 @@ export default function AgregarPagoScreen() {
               },
             ]}
             placeholder="Buscar por técnica quirúrgica..."
-            placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#999"}
+            placeholderTextColor={theme.muted}
             value={searchQuery}
             onChangeText={setSearchQuery}
             clearButtonMode="while-editing"
@@ -205,22 +192,17 @@ export default function AgregarPagoScreen() {
               { color: theme.tint, fontSize: FontsSize[fontSize] + 2 },
             ]}
           >
-            🏥 Técnicas Quirúrgicas Disponibles ({getFilteredFichas().length})
+            🏥 Técnicas Quirúrgicas Disponibles ({filteredFichas.length})
           </Text>
 
-          {getFilteredFichas().length === 0 ? (
-            <Text
-              style={[
-                styles.emptyText,
-                { color: theme.text, fontSize: FontsSize[fontSize] },
-              ]}
-            >
+          {filteredFichas.length === 0 ? (
+            <Text style={[styles.emptyText, { ...commonTextStyle }]}>
               {searchQuery.trim()
                 ? `📝 No se encontraron técnicas que coincidan con "${searchQuery}"`
                 : "📝 No hay técnicas quirúrgicas registradas"}
             </Text>
           ) : (
-            getFilteredFichas().map((ficha) => (
+            filteredFichas.map((ficha) => (
               <TouchableOpacity
                 key={ficha.id}
                 style={[
@@ -243,12 +225,7 @@ export default function AgregarPagoScreen() {
                 >
                   {ficha.nombre_tecnica}
                 </Text>
-                <Text
-                  style={[
-                    styles.fichaDetail,
-                    { color: theme.text, fontSize: FontsSize[fontSize] },
-                  ]}
-                >
+                <Text style={[styles.fichaDetail, { ...commonTextStyle }]}>
                   👨‍⚕️ {ficha.doctor}
                 </Text>
               </TouchableOpacity>
@@ -257,7 +234,9 @@ export default function AgregarPagoScreen() {
         </View>
       </ScrollView>
 
-      {/* Ficha Selection Modal */}
+      {/* Ficha Selection Modal (Currently not used, replaced by direct selection) */}
+      {/* This modal logic seems to be redundant as handleSelectFicha directly sets modalVisible to true.
+          It's kept commented out in case it's part of a different flow or future functionality.
       <Modal
         visible={fichaModalVisible}
         transparent={true}
@@ -278,7 +257,7 @@ export default function AgregarPagoScreen() {
             </Text>
 
             <ScrollView style={styles.modalList}>
-              {getFilteredFichas().map((ficha) => (
+              {filteredFichas.map((ficha) => (
                 <TouchableOpacity
                   key={ficha.id}
                   style={[
@@ -304,7 +283,7 @@ export default function AgregarPagoScreen() {
                   <Text
                     style={[
                       styles.modalFichaDetail,
-                      { color: theme.text, fontSize: FontsSize[fontSize] },
+                      { ...commonTextStyle },
                     ]}
                   >
                     👨‍⚕️ {ficha.doctor}
@@ -314,14 +293,14 @@ export default function AgregarPagoScreen() {
             </ScrollView>
 
             <TouchableOpacity
-              style={[styles.modalButton, { backgroundColor: "#666" }]}
+              style={[styles.modalButton, { backgroundColor: theme.muted }]}
               onPress={() => setFichaModalVisible(false)}
             >
               <Text style={styles.modalButtonText}>Cancelar</Text>
             </TouchableOpacity>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
 
       {/* Payment Form Modal */}
       <Modal
@@ -340,9 +319,7 @@ export default function AgregarPagoScreen() {
                 { color: theme.text, fontSize: FontsSize[fontSize] + 4 },
               ]}
             >
-              {pagos.find((p) => p.fichaId === selectedFicha?.id)
-                ? "Modificar Pago"
-                : "Agregar Pago"}
+              Agregar Pago
             </Text>
 
             {selectedFicha && (
@@ -360,38 +337,27 @@ export default function AgregarPagoScreen() {
             )}
 
             <ScrollView style={styles.formContainer}>
-              {/* Paciente/Clínica */}
-              <Text
-                style={[
-                  styles.inputLabel,
-                  { color: theme.text, fontSize: FontsSize[fontSize] },
-                ]}
-              >
+              {/* Doctor */}
+              <Text style={[styles.inputLabel, { ...commonTextStyle }]}>
                 Doctor que realizó la cirugía:
               </Text>
               <TextInput
                 style={[
                   styles.input,
                   {
-                    backgroundColor:
-                      colorScheme === "dark" ? "#1a1e25" : "#f9f9f9",
+                    backgroundColor: theme.card,
                     color: theme.text,
-                    borderColor: colorScheme === "dark" ? "#555" : "#ccc",
+                    borderColor: theme.border,
                   },
                 ]}
                 value={doctor}
                 onChangeText={setDoctor}
                 placeholder="Nombre del doctor que realizó la cirugía"
-                placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#888"}
+                placeholderTextColor={theme.muted}
               />
 
               {/* Payment Source */}
-              <Text
-                style={[
-                  styles.inputLabel,
-                  { color: theme.text, fontSize: FontsSize[fontSize] },
-                ]}
-              >
+              <Text style={[styles.inputLabel, { ...commonTextStyle }]}>
                 Fuente de Pago:
               </Text>
               <View style={styles.radioGroup}>
@@ -416,12 +382,7 @@ export default function AgregarPagoScreen() {
                       },
                     ]}
                   />
-                  <Text
-                    style={[
-                      styles.radioText,
-                      { color: theme.text, fontSize: FontsSize[fontSize] },
-                    ]}
-                  >
+                  <Text style={[styles.radioText, { ...commonTextStyle }]}>
                     Paciente
                   </Text>
                 </TouchableOpacity>
@@ -447,24 +408,14 @@ export default function AgregarPagoScreen() {
                       },
                     ]}
                   />
-                  <Text
-                    style={[
-                      styles.radioText,
-                      { color: theme.text, fontSize: FontsSize[fontSize] },
-                    ]}
-                  >
+                  <Text style={[styles.radioText, { ...commonTextStyle }]}>
                     Clínica
                   </Text>
                 </TouchableOpacity>
               </View>
 
               {/* Payment Status */}
-              <Text
-                style={[
-                  styles.inputLabel,
-                  { color: theme.text, fontSize: FontsSize[fontSize] },
-                ]}
-              >
+              <Text style={[styles.inputLabel, { ...commonTextStyle }]}>
                 Estado del Pago:
               </Text>
               <View style={styles.radioGroup}>
@@ -473,7 +424,9 @@ export default function AgregarPagoScreen() {
                     styles.radioButton,
                     {
                       borderColor:
-                        paymentStatus === "pending" ? "#FF5722" : "#ccc",
+                        paymentStatus === "pending"
+                          ? theme.pending
+                          : theme.border,
                     },
                   ]}
                   onPress={() => setPaymentStatus("pending")}
@@ -484,17 +437,12 @@ export default function AgregarPagoScreen() {
                       {
                         backgroundColor:
                           paymentStatus === "pending"
-                            ? "#FF5722"
+                            ? theme.pending
                             : "transparent",
                       },
                     ]}
                   />
-                  <Text
-                    style={[
-                      styles.radioText,
-                      { color: theme.text, fontSize: FontsSize[fontSize] },
-                    ]}
-                  >
+                  <Text style={[styles.radioText, { ...commonTextStyle }]}>
                     Pendiente
                   </Text>
                 </TouchableOpacity>
@@ -504,7 +452,7 @@ export default function AgregarPagoScreen() {
                     styles.radioButton,
                     {
                       borderColor:
-                        paymentStatus === "paid" ? "#4CAF50" : "#ccc",
+                        paymentStatus === "paid" ? theme.paid : theme.border,
                     },
                   ]}
                   onPress={() => setPaymentStatus("paid")}
@@ -514,16 +462,11 @@ export default function AgregarPagoScreen() {
                       styles.radioInner,
                       {
                         backgroundColor:
-                          paymentStatus === "paid" ? "#4CAF50" : "transparent",
+                          paymentStatus === "paid" ? theme.paid : "transparent",
                       },
                     ]}
                   />
-                  <Text
-                    style={[
-                      styles.radioText,
-                      { color: theme.text, fontSize: FontsSize[fontSize] },
-                    ]}
-                  >
+                  <Text style={[styles.radioText, { ...commonTextStyle }]}>
                     Pagado
                   </Text>
                 </TouchableOpacity>
@@ -532,42 +475,29 @@ export default function AgregarPagoScreen() {
               {/* Amount (only for patient payments) */}
               {paymentSource === "patient" && (
                 <>
-                  <Text
-                    style={[
-                      styles.inputLabel,
-                      { color: theme.text, fontSize: FontsSize[fontSize] },
-                    ]}
-                  >
+                  <Text style={[styles.inputLabel, { ...commonTextStyle }]}>
                     Monto:
                   </Text>
                   <TextInput
                     style={[
                       styles.input,
                       {
-                        backgroundColor:
-                          colorScheme === "dark" ? "#1a1e25" : "#f9f9f9",
+                        backgroundColor: theme.card,
                         color: theme.text,
-                        borderColor: colorScheme === "dark" ? "#555" : "#ccc",
+                        borderColor: theme.border,
                       },
                     ]}
                     value={amount}
                     onChangeText={handleAmountChange}
                     placeholder="$0,00"
-                    placeholderTextColor={
-                      colorScheme === "dark" ? "#aaa" : "#888"
-                    }
+                    placeholderTextColor={theme.muted}
                     keyboardType="numeric"
                   />
                 </>
               )}
 
               {/* Notes */}
-              <Text
-                style={[
-                  styles.inputLabel,
-                  { color: theme.text, fontSize: FontsSize[fontSize] },
-                ]}
-              >
+              <Text style={[styles.inputLabel, { ...commonTextStyle }]}>
                 Notas (opcional):
               </Text>
               <TextInput
@@ -575,16 +505,15 @@ export default function AgregarPagoScreen() {
                   styles.input,
                   styles.textArea,
                   {
-                    backgroundColor:
-                      colorScheme === "dark" ? "#1a1e25" : "#f9f9f9",
+                    backgroundColor: theme.card,
                     color: theme.text,
-                    borderColor: colorScheme === "dark" ? "#555" : "#ccc",
+                    borderColor: theme.border,
                   },
                 ]}
                 value={notes}
                 onChangeText={setNotes}
                 placeholder="Notas adicionales..."
-                placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#888"}
+                placeholderTextColor={theme.muted}
                 multiline
                 numberOfLines={3}
               />
@@ -592,7 +521,7 @@ export default function AgregarPagoScreen() {
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: "#666" }]}
+                style={[styles.modalButton, { backgroundColor: theme.gray400 }]}
                 onPress={() => {
                   setModalVisible(false);
                   resetForm();
@@ -619,22 +548,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    paddingTop: Platform.OS === "android" ? 50 : 60,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  headerText: {
-    fontWeight: "bold",
-    fontFamily:
-      Platform.OS === "ios" ? "Arial Rounded MT Bold" : "sans-serif-medium",
-  },
   content: {
     flex: 1,
     padding: 16,
+  },
+  contentContainer: {
+    paddingBottom: 100,
   },
   searchContainer: {
     marginBottom: 16,
@@ -643,14 +562,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     padding: 12,
-    fontSize: 16,
   },
   section: {
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: Colors.light.black,
     shadowOpacity: 0.1,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -690,7 +608,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 24,
     elevation: 5,
-    shadowColor: "#000",
+    shadowColor: Colors.light.black,
     shadowOpacity: 0.25,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
@@ -776,7 +694,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalButtonText: {
-    color: "#fff",
+    color: Colors.light.white,
     fontWeight: "bold",
     fontSize: 16,
   },

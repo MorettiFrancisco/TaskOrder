@@ -30,29 +30,13 @@ export default function AgregarFichaScreen() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
 
-  const backgroundColor = theme.background;
-  const textColor = theme.text;
-  const inputBg = colorScheme === "dark" ? theme.card : "#f9f9f9";
-  const borderColor = theme.border;
-  const buttonBg = theme.tint;
-  const buttonText = "#fff";
-
-  // Flags para manejar alertas y navegación
   const alertVisible = useRef(false);
   const confirmedExit = useRef(false);
 
-  /**
-   * Muestra alerta de confirmación si hay datos ingresados.
-   * Retorna true si bloquea la navegación (alerta en pantalla), false si permite continuar.
-   */
   const confirmExit = useCallback(
     (onConfirm?: () => void) => {
-      if (alertVisible.current) {
-        return true; // Ya mostrando alerta, bloquea navegación
-      }
-      if (confirmedExit.current) {
-        return false; // Confirmación previa, permite navegación
-      }
+      if (alertVisible.current) return true;
+      if (confirmedExit.current) return false;
       if (nombreTecnica || doctor || descripcion || materiales) {
         alertVisible.current = true;
         Alert.alert(
@@ -72,11 +56,8 @@ export default function AgregarFichaScreen() {
               onPress: () => {
                 alertVisible.current = false;
                 confirmedExit.current = true;
-                if (onConfirm) {
-                  onConfirm();
-                } else {
-                  router.replace("/");
-                }
+                if (onConfirm) onConfirm();
+                else router.replace("/");
               },
             },
           ],
@@ -84,19 +65,17 @@ export default function AgregarFichaScreen() {
         );
         return true;
       }
-      return false; // Sin datos, no bloquea
+      return false;
     },
     [nombreTecnica, doctor, descripcion, materiales, router]
   );
 
-  // Manejo de botón físico y flecha de back
   useFocusEffect(
     useCallback(() => {
       alertVisible.current = false;
       confirmedExit.current = false;
 
       const onBackPress = () => {
-        // Si retorna true, bloquea el back y muestra alerta
         if (
           confirmExit(() => {
             confirmedExit.current = true;
@@ -105,7 +84,7 @@ export default function AgregarFichaScreen() {
         ) {
           return true;
         }
-        return false; // Permite back si no hay datos
+        return false;
       };
 
       const backHandlerSubscription = BackHandler.addEventListener(
@@ -122,10 +101,11 @@ export default function AgregarFichaScreen() {
           confirmedExit.current ||
           alertVisible.current
         ) {
-          return; // Permite la navegación
+          return;
         }
 
-        // Mostrar la confirmación
+        e.preventDefault();
+
         alertVisible.current = true;
         Alert.alert(
           "Cancelar",
@@ -161,7 +141,6 @@ export default function AgregarFichaScreen() {
     }, [confirmExit, navigation, router])
   );
 
-  // Manejo de guardar ficha
   const handleGuardar = async () => {
     if (
       !nombreTecnica.trim() ||
@@ -178,9 +157,7 @@ export default function AgregarFichaScreen() {
 
     if (await existeFichaPorTecnica(nombreTecnica)) {
       const fichaExistente = await obtenerFichaPorTecnica(nombreTecnica);
-      const doctorExistente = fichaExistente
-        ? fichaExistente.doctor
-        : "Desconocido";
+      const doctorExistente = fichaExistente?.doctor || "Desconocido";
       Alert.alert(
         "Ficha existente",
         `Ya existe una ficha con ese nombre de técnica.\nDoctor: ${doctorExistente}\n¿Desea agregar igualmente?`,
@@ -234,77 +211,98 @@ export default function AgregarFichaScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={[styles.container, { backgroundColor }]}>
+    <ScrollView
+      contentContainerStyle={[
+        styles.container,
+        { backgroundColor: theme.background },
+      ]}
+    >
       <View
         style={[
           styles.form,
           {
-            backgroundColor: colorScheme === "dark" ? "#292d36" : "#fff",
-            borderColor,
+            backgroundColor: theme.background,
+            borderColor: theme.border,
           },
         ]}
       >
-        <Text style={[styles.title, { color: textColor }]}>Agregar Ficha</Text>
-        <Text style={[styles.label, { color: textColor }]}>
+        <Text style={[styles.title, { color: theme.text }]}>Agregar Ficha</Text>
+        <Text style={[styles.label, { color: theme.text }]}>
           Nombre de la Técnica
         </Text>
         <TextInput
           style={[
             styles.input,
-            { backgroundColor: inputBg, color: textColor, borderColor },
+            {
+              backgroundColor: theme.card,
+              color: theme.text,
+              borderColor: theme.border,
+            },
           ]}
           value={nombreTecnica}
           onChangeText={setNombreTecnica}
           placeholder="Ej: Colecistectomía"
-          placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#888"}
+          placeholderTextColor={theme.muted}
           autoCapitalize="sentences"
         />
-        <Text style={[styles.label, { color: textColor }]}>Doctor</Text>
+        <Text style={[styles.label, { color: theme.text }]}>Doctor</Text>
         <TextInput
           style={[
             styles.input,
-            { backgroundColor: inputBg, color: textColor, borderColor },
+            {
+              backgroundColor: theme.card,
+              color: theme.text,
+              borderColor: theme.border,
+            },
           ]}
           value={doctor}
           onChangeText={setDoctor}
           placeholder="Ej: Dr. Pérez"
-          placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#888"}
+          placeholderTextColor={theme.muted}
           autoCapitalize="words"
         />
-        <Text style={[styles.label, { color: textColor }]}>
+        <Text style={[styles.label, { color: theme.text }]}>
           Descripción / Técnica Quirúrgica
         </Text>
         <TextInput
           style={[
             styles.textArea,
-            { backgroundColor: inputBg, color: textColor, borderColor },
+            {
+              backgroundColor: theme.card,
+              color: theme.text,
+              borderColor: theme.border,
+            },
           ]}
           value={descripcion}
           onChangeText={setDescripcion}
           placeholder="Describa la técnica quirúrgica en detalle..."
-          placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#888"}
+          placeholderTextColor={theme.muted}
           multiline
           textAlignVertical="top"
         />
-        <Text style={[styles.label, { color: textColor }]}>Materiales</Text>
+        <Text style={[styles.label, { color: theme.text }]}>Materiales</Text>
         <TextInput
           style={[
             styles.textArea,
-            { backgroundColor: inputBg, color: textColor, borderColor },
+            {
+              backgroundColor: theme.card,
+              color: theme.text,
+              borderColor: theme.border,
+            },
           ]}
           value={materiales}
           onChangeText={setMateriales}
           placeholder="Liste los materiales necesarios para la cirugía..."
-          placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#888"}
+          placeholderTextColor={theme.muted}
           multiline
           textAlignVertical="top"
         />
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: buttonBg }]}
+          style={[styles.button, { backgroundColor: theme.tint }]}
           onPress={handleGuardar}
           activeOpacity={0.85}
         >
-          <Text style={[styles.buttonText, { color: buttonText }]}>
+          <Text style={[styles.buttonText, { color: theme.white }]}>
             Guardar Ficha
           </Text>
         </TouchableOpacity>
@@ -319,6 +317,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 24,
+    paddingBottom: 100,
   },
   form: {
     width: "100%",
@@ -326,7 +325,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 24,
     borderWidth: 1,
-    shadowColor: "#000",
+    shadowColor: Colors.light.black,
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
@@ -365,7 +364,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 36,
     borderRadius: 24,
     elevation: 2,
-    shadowColor: "#d72660",
+    shadowColor: Colors.light.tint,
     shadowOpacity: 0.18,
     shadowRadius: 6,
   },

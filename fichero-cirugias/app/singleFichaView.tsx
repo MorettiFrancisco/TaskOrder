@@ -66,7 +66,7 @@ export default function SingleFichaView() {
   // Paleta de colores según tema
   const editBg = theme.tint; // rosado fuerte
   const editText = theme.background; // fondo claro/oscuro
-  const deleteBg = "#fff0f5"; // rosado muy claro, igual en ambos temas
+  const deleteBg = theme.card; // rosado muy claro, igual en ambos temas
   const deleteText = theme.tint; // rosado fuerte
 
   if (!ficha) {
@@ -120,7 +120,7 @@ export default function SingleFichaView() {
           <Text
             style={[
               styles.label,
-              { color: "#d72660", fontSize: FontsSize[fontSize] },
+              { color: theme.tint, fontSize: FontsSize[fontSize] },
             ]}
           >
             Doctor:
@@ -175,11 +175,12 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 16,
+    paddingBottom: 100,
   },
   card: {
     borderRadius: 12,
     padding: 20,
-    shadowColor: "#000",
+    shadowColor: Colors.light.black,
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
@@ -238,16 +239,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     borderRadius: 24,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: Colors.light.black,
     shadowOpacity: 0.1,
     shadowRadius: 4,
     marginLeft: 8,
   },
   editButton: {
-    backgroundColor: "#5cb85c",
+    backgroundColor: Colors.light.green600,
   },
   deleteButton: {
-    backgroundColor: "#d72660",
+    backgroundColor: Colors.light.pink600,
   },
   actionText: {
     fontWeight: "bold",

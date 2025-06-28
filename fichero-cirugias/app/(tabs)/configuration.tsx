@@ -79,7 +79,7 @@ export default function ConfigurationScreen() {
                   style={[
                     styles.option,
                     {
-                      color: fontSize === size ? "#fff" : Colors.light.tint,
+                      color: fontSize === size ? theme.background : theme.tint,
                       fontWeight: fontSize === size ? "bold" : "normal",
                       fontSize: FontsSize[size],
                       paddingHorizontal: 12,
@@ -100,7 +100,7 @@ export default function ConfigurationScreen() {
             style={[styles.button, { backgroundColor: theme.tint }]}
             activeOpacity={0.85}
           >
-            <Text style={[styles.buttonText, { color: "#fff" }]}>
+            <Text style={[styles.buttonText, { color: theme.background }]}>
               ⬆️ Exportar Fichas
             </Text>
           </TouchableOpacity>
@@ -109,7 +109,7 @@ export default function ConfigurationScreen() {
             style={[styles.button, { backgroundColor: theme.success }]}
             activeOpacity={0.85}
           >
-            <Text style={[styles.buttonText, { color: "#fff" }]}>
+            <Text style={[styles.buttonText, { color: theme.background }]}>
               ⬇️ Importar Fichas
             </Text>
           </TouchableOpacity>
@@ -123,7 +123,7 @@ export default function ConfigurationScreen() {
               textAlign: "center",
             }}
           >
-            TaskOrder v1.1 • Hecho con ❤️
+            TaskOrder v2.0 • Hecho con ❤️
           </Text>
         </View>
       </ScrollView>
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: Colors.light.gray200,
     marginBottom: 10,
   },
   headerText: {
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: "center",
     marginHorizontal: 4,
-    shadowColor: "#000",
+    shadowColor: Colors.light.black,
     shadowOpacity: 0.13,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 3,

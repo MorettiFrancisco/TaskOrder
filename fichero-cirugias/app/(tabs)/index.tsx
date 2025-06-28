@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,27 +10,27 @@ import {
   StatusBar,
   SafeAreaView,
   useColorScheme,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { useConfiguracion } from '../context/configuracionContext';
-import { Colors } from '../../constants/Colors';
-import { FontsSize } from '../../constants/FontsSize';
-import { cargarFichas } from '../../utils/fichasStorage';
-import Ficha from '../../models/ficha';
-import { useFocusEffect } from '@react-navigation/native';
+} from "react-native";
+import { useRouter } from "expo-router";
+import { useConfiguracion } from "../context/configuracionContext";
+import { Colors } from "../../constants/Colors";
+import { FontsSize } from "../../constants/FontsSize";
+import { cargarFichas } from "../../utils/fichasStorage";
+import Ficha from "../../models/ficha";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function HomeScreen() {
   const [fichas, setFichas] = useState<Ficha[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const { fontSize } = useConfiguracion();
   const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
-  const backgroundColor = colorScheme === 'dark' ? '#23272f' : '#fff';
+  const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
+  const backgroundColor = theme.background;
 
   // Sugerencias: fondo y borde adaptados al tema
-  const suggestionsBg = colorScheme === 'dark' ? '#2a2e37' : '#fff';
-  const suggestionItemBorder = colorScheme === 'dark' ? '#353945' : '#eee';
+  const suggestionsBg = theme.card;
+  const suggestionItemBorder = theme.cardBorder;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -55,16 +55,16 @@ export default function HomeScreen() {
           styles.safeContainer,
           {
             backgroundColor,
-            paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+            paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
           },
         ]}
       >
         <StatusBar
-          barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+          barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
           backgroundColor={backgroundColor}
         />
         <View style={[styles.header, { backgroundColor }]}>
-          <Text style={[styles.appTitle, { color: colorScheme === 'dark' ? '#fff' : '#d72660' }]}>
+          <Text style={[styles.appTitle, { color: theme.tint }]}>
             Fichero Cirugías
           </Text>
         </View>
@@ -78,13 +78,13 @@ export default function HomeScreen() {
                   styles.searchInput,
                   {
                     color: theme.text,
-                    borderColor: colorScheme === 'dark' ? '#555' : '#ffb6d5',
-                    backgroundColor: colorScheme === 'dark' ? '#2a2e37' : '#fff',
+                    borderColor: theme.tint,
+                    backgroundColor: theme.card,
                     fontSize: FontsSize[fontSize],
                   },
                 ]}
                 placeholder="Buscar por técnica o doctor..."
-                placeholderTextColor={colorScheme === 'dark' ? '#aaa' : '#d72660'}
+                placeholderTextColor={theme.muted}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 clearButtonMode="while-editing"
@@ -93,37 +93,51 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={[
                 styles.addButton,
-                { backgroundColor: colorScheme === 'dark' ? '#353945' : '#ffb6d5', marginLeft: 8 },
+                { backgroundColor: theme.tint, marginLeft: 8 },
               ]}
-              onPress={() => router.push('/functions/agregarFicha')}
+              onPress={() => router.push("/functions/agregarFicha")}
               activeOpacity={0.8}
             >
-              <Text style={{ color: colorScheme === 'dark' ? '#ffb6d5' : '#d72660', fontSize: 28, fontWeight: 'bold' }}>+</Text>
+              <Text style={{ color: "#fff", fontSize: 28, fontWeight: "bold" }}>
+                +
+              </Text>
             </TouchableOpacity>
           </View>
 
           {searchQuery.length > 0 && (
-            <View style={[styles.suggestionsContainer, { backgroundColor: suggestionsBg }]}>
+            <View
+              style={[
+                styles.suggestionsContainer,
+                { backgroundColor: suggestionsBg },
+              ]}
+            >
               {[
                 ...fichas
-                  .filter(f =>
-                    f.nombre_tecnica.toLowerCase().startsWith(searchQuery.toLowerCase())
+                  .filter((f) =>
+                    f.nombre_tecnica
+                      .toLowerCase()
+                      .startsWith(searchQuery.toLowerCase())
                   )
-                  .map(f => f.nombre_tecnica),
+                  .map((f) => f.nombre_tecnica),
                 ...fichas
-                  .filter(f =>
+                  .filter((f) =>
                     f.doctor.toLowerCase().startsWith(searchQuery.toLowerCase())
                   )
-                  .map(f => f.doctor),
+                  .map((f) => f.doctor),
               ]
                 .filter((item, idx, arr) => arr.indexOf(item) === idx) // Evita duplicados
-                .filter(item => item.toLowerCase().startsWith(searchQuery.toLowerCase())) // Solo sugerencias que comiencen igual
+                .filter((item) =>
+                  item.toLowerCase().startsWith(searchQuery.toLowerCase())
+                ) // Solo sugerencias que comiencen igual
                 .slice(0, 5)
                 .map((suggestion, idx) => (
                   <TouchableOpacity
                     key={idx}
                     onPress={() => setSearchQuery(suggestion)}
-                    style={[styles.suggestionItem, { borderBottomColor: suggestionItemBorder }]}
+                    style={[
+                      styles.suggestionItem,
+                      { borderBottomColor: suggestionItemBorder },
+                    ]}
                   >
                     <Text style={{ color: theme.text }}>{suggestion}</Text>
                   </TouchableOpacity>
@@ -137,7 +151,13 @@ export default function HomeScreen() {
             contentContainerStyle={{ paddingBottom: 24 }}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
-              <Text style={{ color: theme.icon, textAlign: 'center', marginTop: 40 }}>
+              <Text
+                style={{
+                  color: theme.icon,
+                  textAlign: "center",
+                  marginTop: 40,
+                }}
+              >
                 No hay fichas para mostrar.
               </Text>
             }
@@ -146,18 +166,23 @@ export default function HomeScreen() {
                 style={[
                   styles.card,
                   {
-                    backgroundColor: '#ffe4ec', // SIEMPRE rosado claro
-                    shadowColor: '#d72660',
-                    borderColor: '#ffb6d5',
+                    backgroundColor: theme.card,
+                    shadowColor: theme.tint,
+                    borderColor: theme.border,
                   },
                 ]}
                 activeOpacity={0.85}
-                onPress={() => router.push({ pathname: '/singleFichaView', params: { id: item.id } })}
+                onPress={() =>
+                  router.push({
+                    pathname: "/singleFichaView",
+                    params: { id: item.id },
+                  })
+                }
               >
                 <Text
                   style={[
                     styles.technique,
-                    { color: '#d72660', fontSize: FontsSize[fontSize] + 2 }, // SIEMPRE rosado fuerte
+                    { color: theme.tint, fontSize: FontsSize[fontSize] + 2 },
                   ]}
                 >
                   {item.nombre_tecnica}
@@ -165,7 +190,7 @@ export default function HomeScreen() {
                 <Text
                   style={[
                     styles.doctor,
-                    { color: '#d72660', fontSize: FontsSize[fontSize] }, // SIEMPRE rosado fuerte
+                    { color: theme.text, fontSize: FontsSize[fontSize] }, // Usar color del tema
                   ]}
                 >
                   Doctor: {item.doctor}
@@ -173,7 +198,7 @@ export default function HomeScreen() {
                 <Text
                   style={[
                     styles.description,
-                    { color: '#23272f', fontSize: FontsSize[fontSize] - 2 }, // SIEMPRE gris oscuro
+                    { color: theme.text, fontSize: FontsSize[fontSize] - 2 }, // Usar color del tema
                   ]}
                   numberOfLines={2}
                 >
@@ -194,15 +219,16 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingVertical: 12,
-    alignItems: 'center',
+    alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   appTitle: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     letterSpacing: 1,
-    fontFamily: Platform.OS === 'ios' ? 'Arial Rounded MT Bold' : 'sans-serif-medium',
+    fontFamily:
+      Platform.OS === "ios" ? "Arial Rounded MT Bold" : "sans-serif-medium",
   },
   container: {
     flex: 1,
@@ -210,32 +236,32 @@ const styles = StyleSheet.create({
     paddingTop: 6,
   },
   searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 18,
   },
   searchBox: {
     flex: 1,
     borderRadius: 10,
-    overflow: 'hidden',
+    overflow: "hidden",
     elevation: 1,
   },
   searchInput: {
     borderWidth: 1.5,
     borderRadius: 10,
     padding: 10,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   addButton: {
     width: 44,
     height: 44,
     borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     elevation: 2,
   },
   buttonText: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 16,
     letterSpacing: 1,
   },
@@ -250,7 +276,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   technique: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 6,
   },
   doctor: {
@@ -261,14 +287,14 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   suggestionsContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 48,
     left: 0,
     right: 0,
     borderRadius: 8,
     zIndex: 10,
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,

@@ -1,3 +1,7 @@
+// Required imports for Expo Router
+import React from "react";
+import { View } from "react-native";
+
 /**
  * Formats a number as currency with Colombian peso formatting
  * @param amount - The amount to format
@@ -64,3 +68,8 @@ export const formatCurrencyInput = (input: string): string => {
   const formatted = parts.length > 1 ? parts.join(",") : parts[0];
   return formatted ? `$${formatted}` : "";
 };
+
+// Required default export for Expo Router
+export default function FormatCurrencyScreen() {
+  return <View style={{ display: "none" }} />;
+}

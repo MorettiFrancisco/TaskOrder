@@ -5,14 +5,16 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { Colors } from "../../constants/Colors";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
 
-  // Colores personalizados para la tab bar
-  const activeColor = colorScheme === "dark" ? "#ffb6d5" : "#d72660";
-  const inactiveColor = colorScheme === "dark" ? "#aaa" : "#bbb";
-  const tabBarBg = colorScheme === "dark" ? "#23272f" : "#fff";
+  // Colores personalizados para la tab bar usando el nuevo tema
+  const activeColor = theme.tint;
+  const inactiveColor = theme.tabIconDefault;
+  const tabBarBg = theme.background;
 
   return (
     <Tabs
@@ -25,12 +27,12 @@ export default function TabLayout() {
           ios: {
             position: "absolute",
             backgroundColor: tabBarBg,
-            borderTopColor: colorScheme === "dark" ? "#353945" : "#eee",
+            borderTopColor: theme.border,
             opacity: 1,
           },
           default: {
             backgroundColor: tabBarBg,
-            borderTopColor: colorScheme === "dark" ? "#353945" : "#eee",
+            borderTopColor: theme.border,
           },
         }),
       }}

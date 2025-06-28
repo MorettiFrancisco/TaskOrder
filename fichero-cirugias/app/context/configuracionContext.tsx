@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { View } from "react-native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
@@ -147,4 +148,9 @@ export function ConfiguracionProvider({ children }: React.PropsWithChildren) {
       {children}
     </ConfiguracionContext.Provider>
   );
+}
+
+// Required default export for Expo Router
+export default function ConfiguracionContextScreen() {
+  return <View style={{ display: "none" }} />;
 }

@@ -15,6 +15,7 @@ import { obtenerFichaPorId, editarFichaPorId } from "../../utils/fichasStorage";
 import Ficha from "../../models/ficha";
 import { useColorScheme } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import { Colors } from "../../constants/Colors";
 
 export default function ModificarFichaScreen() {
   const router = useRouter();
@@ -32,11 +33,12 @@ export default function ModificarFichaScreen() {
     materiales: "",
   });
   const colorScheme = useColorScheme();
-  const backgroundColor = colorScheme === "dark" ? "#23272f" : "#fff";
-  const textColor = colorScheme === "dark" ? "#fff" : "#23272f";
-  const inputBg = colorScheme === "dark" ? "#2a2e37" : "#f9f9f9";
-  const borderColor = colorScheme === "dark" ? "#555" : "#ccc";
-  const buttonBg = colorScheme === "dark" ? "#d72660" : "#d72660";
+  const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
+  const backgroundColor = theme.background;
+  const textColor = theme.text;
+  const inputBg = colorScheme === "dark" ? theme.card : "#f9f9f9";
+  const borderColor = theme.border;
+  const buttonBg = theme.tint;
   const buttonText = "#fff";
 
   // Flags para manejar alertas y navegación

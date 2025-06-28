@@ -64,11 +64,10 @@ export default function SingleFichaView() {
   };
 
   // Paleta de colores según tema
-  const editBg = colorScheme === "dark" ? Colors.dark.tint : Colors.light.tint; // rosado fuerte
-  const editText =
-    colorScheme === "dark" ? Colors.dark.background : Colors.light.background; // fondo claro/oscuro
+  const editBg = theme.tint; // rosado fuerte
+  const editText = theme.background; // fondo claro/oscuro
   const deleteBg = "#fff0f5"; // rosado muy claro, igual en ambos temas
-  const deleteText = Colors.light.tint; // rosado fuerte
+  const deleteText = theme.tint; // rosado fuerte
 
   if (!ficha) {
     return (
@@ -87,12 +86,12 @@ export default function SingleFichaView() {
         { backgroundColor: theme.background },
       ]}
     >
-      <View style={[styles.card, { backgroundColor: "#ffe4ec" }]}>
+      <View style={[styles.card, { backgroundColor: theme.card }]}>
         <View style={styles.titleRow}>
           <Text
             style={[
               styles.title,
-              { color: "#23272f", fontSize: FontsSize[fontSize] + 6, flex: 1 },
+              { color: theme.text, fontSize: FontsSize[fontSize] + 6, flex: 1 },
             ]}
             numberOfLines={2}
           >
@@ -105,7 +104,7 @@ export default function SingleFichaView() {
               activeOpacity={0.7}
               accessibilityLabel="Editar ficha"
             >
-              <AntDesign name="edit" size={22} color={Colors.light.tint} />
+              <AntDesign name="edit" size={22} color={theme.tint} />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.iconButton}
@@ -113,7 +112,7 @@ export default function SingleFichaView() {
               activeOpacity={0.7}
               accessibilityLabel="Eliminar ficha"
             >
-              <AntDesign name="delete" size={22} color={Colors.light.tint} />
+              <AntDesign name="delete" size={22} color={theme.tint} />
             </TouchableOpacity>
           </View>
         </View>
@@ -129,7 +128,7 @@ export default function SingleFichaView() {
           <Text
             style={[
               styles.value,
-              { color: "#23272f", fontSize: FontsSize[fontSize] },
+              { color: theme.text, fontSize: FontsSize[fontSize] },
             ]}
           >
             {ficha.doctor}
@@ -138,7 +137,7 @@ export default function SingleFichaView() {
         <Text
           style={[
             styles.sectionTitle,
-            { color: "#23272f", fontSize: FontsSize[fontSize] + 2 },
+            { color: theme.text, fontSize: FontsSize[fontSize] + 2 },
           ]}
         >
           Descripción / Técnica Quirúrgica
@@ -146,7 +145,7 @@ export default function SingleFichaView() {
         <Text
           style={[
             styles.description,
-            { color: "#23272f", fontSize: FontsSize[fontSize] },
+            { color: theme.text, fontSize: FontsSize[fontSize] },
           ]}
         >
           {ficha.descripcion}
@@ -154,7 +153,7 @@ export default function SingleFichaView() {
         <Text
           style={[
             styles.sectionTitle,
-            { color: "#23272f", fontSize: FontsSize[fontSize] + 2 },
+            { color: theme.text, fontSize: FontsSize[fontSize] + 2 },
           ]}
         >
           Materiales
@@ -162,7 +161,7 @@ export default function SingleFichaView() {
         <Text
           style={[
             styles.description,
-            { color: "#23272f", fontSize: FontsSize[fontSize] },
+            { color: theme.text, fontSize: FontsSize[fontSize] },
           ]}
         >
           {ficha.materiales || "No especificados"}

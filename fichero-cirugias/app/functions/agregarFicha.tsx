@@ -18,6 +18,7 @@ import {
 } from "../../utils/fichasStorage";
 import Ficha from "../../models/ficha";
 import { useColorScheme } from "react-native";
+import { Colors } from "../../constants/Colors";
 
 export default function AgregarFichaScreen() {
   const [nombreTecnica, setNombreTecnica] = useState("");
@@ -27,12 +28,13 @@ export default function AgregarFichaScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const colorScheme = useColorScheme();
+  const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
 
-  const backgroundColor = colorScheme === "dark" ? "#23272f" : "#fff";
-  const textColor = colorScheme === "dark" ? "#fff" : "#23272f";
-  const inputBg = colorScheme === "dark" ? "#2a2e37" : "#f9f9f9";
-  const borderColor = colorScheme === "dark" ? "#555" : "#ccc";
-  const buttonBg = "#d72660";
+  const backgroundColor = theme.background;
+  const textColor = theme.text;
+  const inputBg = colorScheme === "dark" ? theme.card : "#f9f9f9";
+  const borderColor = theme.border;
+  const buttonBg = theme.tint;
   const buttonText = "#fff";
 
   // Flags para manejar alertas y navegación

@@ -13,7 +13,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { cargarFichas } from "../../utils/fichasStorage";
 import { cargarPagos } from "../../utils/paymentsStorage";
-import { formatCurrency } from "../../utils/formatCurrency";
+import { formatCurrency } from "../functions/formatCurrency";
 import Ficha from "../../models/ficha";
 import Payment from "../../models/payment";
 import { useConfiguracion } from "../context/configuracionContext";
@@ -36,9 +36,11 @@ export default function PaymentScreen() {
   const { fontSize } = useConfiguracion();
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
-  const backgroundColor = colorScheme === "dark" ? "#23272f" : "#fff";
-  const topInset =
-    Platform.OS === "android" ? StatusBar.currentHeight ?? 24 : 0;
+  const backgroundColor = theme.background;
+
+  // Card background colors consistent with other screens using new palette
+  const cardBg = theme.card;
+  const borderColor = theme.cardBorder;
 
   // Get only payments that are completed (paid)
   const completedPayments = pagos.filter(
@@ -188,8 +190,8 @@ export default function PaymentScreen() {
         style={[
           styles.surgeryCard,
           {
-            backgroundColor: colorScheme === "dark" ? "#2a2e37" : "#fff",
-            borderColor: colorScheme === "dark" ? "#353945" : "#eee",
+            backgroundColor: cardBg,
+            borderColor: borderColor,
           },
         ]}
       >
@@ -197,7 +199,7 @@ export default function PaymentScreen() {
           <Text
             style={[
               styles.surgeryName,
-              { color: Colors.light.tint, fontSize: FontsSize[fontSize] + 2 },
+              { color: theme.tint, fontSize: FontsSize[fontSize] + 2 },
             ]}
           >
             {ficha.nombre_tecnica}
@@ -208,13 +210,13 @@ export default function PaymentScreen() {
               onPress={() => handleEditPayment(payment)}
               activeOpacity={0.7}
             >
-              <AntDesign name="edit" size={16} color={Colors.light.tint} />
+              <AntDesign name="edit" size={16} color={theme.tint} />
             </TouchableOpacity>
             <View
               style={[
                 styles.statusBadge,
                 {
-                  backgroundColor: isPaidSection ? "#4CAF50" : "#FF5722",
+                  backgroundColor: isPaidSection ? theme.paid : theme.pending,
                 },
               ]}
             >
@@ -234,15 +236,6 @@ export default function PaymentScreen() {
           👨‍⚕️ Doctor que realizó: {payment.doctor || "No especificado"}
         </Text>
 
-        <Text
-          style={[
-            styles.surgeryDetail,
-            { color: theme.text, fontSize: FontsSize[fontSize] },
-          ]}
-        >
-          🩺 Técnica de la ficha: {ficha.doctor}
-        </Text>
-
         {payment.paymentDate && (
           <Text
             style={[
@@ -260,7 +253,7 @@ export default function PaymentScreen() {
             style={[
               styles.surgeryDetail,
               {
-                color: Colors.light.tint,
+                color: theme.tint,
                 fontSize: FontsSize[fontSize],
                 fontWeight: "bold",
               },
@@ -280,61 +273,76 @@ export default function PaymentScreen() {
         backgroundColor={backgroundColor}
       />
 
-      <View
-        style={[styles.header, { backgroundColor, paddingTop: topInset + 12 }]}
-      >
-        <Text
-          style={[
-            styles.headerText,
-            {
-              color: Colors.light.tint,
-              fontSize: FontsSize[fontSize] + 8,
-              letterSpacing: 1.5,
-            },
-          ]}
-        >
-          💰 Pagos
-        </Text>
+      {/* Main Content Container */}
+      <View style={{ flex: 1, paddingTop: Platform.OS === "ios" ? 0 : 20 }}>
+        {/* Title */}
+        <View style={[styles.titleContainer, { backgroundColor, borderBottomColor: theme.cardBorder }]}>
+          <Text
+            style={[
+              styles.titleText,
+              {
+                color: theme.tint,
+                fontSize: Math.min(FontsSize[fontSize] + 6, 26), // Aumentar tamaño
+                letterSpacing: 0.5,
+              },
+            ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
+          >
+            💰 Pagos
+          </Text>
+        </View>
 
-        {/* Month/Year Selector */}
+        <View style={[styles.header, { backgroundColor }]}>
+          {/* Month/Year Selector */}
         <View style={styles.monthSelector}>
           <TouchableOpacity
-            style={[styles.monthButton, { borderColor: Colors.light.tint }]}
+            style={[styles.monthButton, { borderColor: theme.tint }]}
             onPress={() => handleMonthChange("prev")}
             activeOpacity={0.7}
           >
-            <AntDesign name="left" size={16} color={Colors.light.tint} />
+            <AntDesign name="left" size={16} color={theme.tint} />
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.monthDisplay, { borderColor: Colors.light.tint }]}
+            style={[styles.monthDisplay, { borderColor: theme.tint }]}
             onPress={goToCurrentMonth}
             activeOpacity={0.7}
           >
             <Text
               style={[
                 styles.monthText,
-                { color: Colors.light.tint, fontSize: FontsSize[fontSize] + 2 },
+                {
+                  color: theme.tint,
+                  fontSize: Math.min(FontsSize[fontSize], 16), // Reducir tamaño máximo
+                },
               ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
             >
               {getMonthName(selectedMonth)} {selectedYear}
             </Text>
             <Text
               style={[
                 styles.monthHint,
-                { color: theme.text, fontSize: FontsSize[fontSize] - 2 },
+                {
+                  color: theme.muted,
+                  fontSize: Math.min(FontsSize[fontSize] - 3, 10), // Reducir tamaño
+                },
               ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
             >
               Toca para ir al mes actual
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.monthButton, { borderColor: Colors.light.tint }]}
+            style={[styles.monthButton, { borderColor: theme.tint }]}
             onPress={() => handleMonthChange("next")}
             activeOpacity={0.7}
           >
-            <AntDesign name="right" size={16} color={Colors.light.tint} />
+            <AntDesign name="right" size={16} color={theme.tint} />
           </TouchableOpacity>
         </View>
       </View>
@@ -344,8 +352,8 @@ export default function PaymentScreen() {
         style={[
           styles.summaryContainer,
           {
-            backgroundColor: colorScheme === "dark" ? "#2a2e37" : "#f8f8f8",
-            borderBottomColor: colorScheme === "dark" ? "#353945" : "#eee",
+            backgroundColor: cardBg,
+            borderColor: borderColor,
           },
         ]}
       >
@@ -353,16 +361,26 @@ export default function PaymentScreen() {
           <Text
             style={[
               styles.summaryNumber,
-              { color: "#FF5722", fontSize: FontsSize[fontSize] + 4 },
+              {
+                color: theme.pending,
+                fontSize: Math.min(FontsSize[fontSize] + 3, 28), // Limitar tamaño
+              },
             ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
           >
             {totalPending}
           </Text>
           <Text
             style={[
               styles.summaryLabel,
-              { color: theme.text, fontSize: FontsSize[fontSize] - 1 },
+              {
+                color: theme.text,
+                fontSize: Math.min(FontsSize[fontSize] - 1, 14), // Limitar tamaño
+              },
             ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
           >
             Pendientes
           </Text>
@@ -372,16 +390,26 @@ export default function PaymentScreen() {
           <Text
             style={[
               styles.summaryNumber,
-              { color: "#4CAF50", fontSize: FontsSize[fontSize] + 4 },
+              {
+                color: theme.paid,
+                fontSize: Math.min(FontsSize[fontSize] + 3, 28), // Limitar tamaño
+              },
             ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
           >
             {totalPaid}
           </Text>
           <Text
             style={[
               styles.summaryLabel,
-              { color: theme.text, fontSize: FontsSize[fontSize] - 1 },
+              {
+                color: theme.text,
+                fontSize: Math.min(FontsSize[fontSize] - 1, 14), // Limitar tamaño
+              },
             ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
           >
             Pagados
           </Text>
@@ -391,31 +419,42 @@ export default function PaymentScreen() {
           <Text
             style={[
               styles.summaryNumber,
-              { color: Colors.light.tint, fontSize: FontsSize[fontSize] + 2 },
+              {
+                color: theme.tint,
+                fontSize: Math.min(FontsSize[fontSize] + 1, 22), // Más pequeño para texto largo
+              },
             ]}
+            numberOfLines={2}
+            adjustsFontSizeToFit={true}
           >
             {formatCurrency(totalPaidAmount)}
           </Text>
           <Text
             style={[
               styles.summaryLabel,
-              { color: theme.text, fontSize: FontsSize[fontSize] - 1 },
+              {
+                color: theme.text,
+                fontSize: Math.min(FontsSize[fontSize] - 1, 14), // Limitar tamaño
+              },
             ]}
+            numberOfLines={2}
+            adjustsFontSizeToFit={true}
           >
             Total Recaudado
           </Text>
         </View>
       </View>
 
-      <ScrollView style={{ flex: 1, backgroundColor }}>
+      <ScrollView
+        style={{ flex: 1, backgroundColor }}
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* To Be Paid Section */}
         <TouchableOpacity
           style={[
             styles.sectionHeader,
-            {
-              backgroundColor: colorScheme === "dark" ? "#2a2e37" : "#fff",
-              borderBottomColor: colorScheme === "dark" ? "#353945" : "#eee",
-            },
+            { backgroundColor: cardBg, borderColor },
           ]}
           onPress={() => setShowToBePaid(!showToBePaid)}
           activeOpacity={0.7}
@@ -423,7 +462,7 @@ export default function PaymentScreen() {
           <Text
             style={[
               styles.sectionTitle,
-              { color: "#FF5722", fontSize: FontsSize[fontSize] + 2 },
+              { color: theme.pending, fontSize: FontsSize[fontSize] + 2 },
             ]}
           >
             🔴 Por Pagar ({totalPending})
@@ -463,10 +502,7 @@ export default function PaymentScreen() {
         <TouchableOpacity
           style={[
             styles.sectionHeader,
-            {
-              backgroundColor: colorScheme === "dark" ? "#2a2e37" : "#fff",
-              borderBottomColor: colorScheme === "dark" ? "#353945" : "#eee",
-            },
+            { backgroundColor: cardBg, borderColor },
           ]}
           onPress={() => setShowPaid(!showPaid)}
           activeOpacity={0.7}
@@ -474,7 +510,7 @@ export default function PaymentScreen() {
           <Text
             style={[
               styles.sectionTitle,
-              { color: "#4CAF50", fontSize: FontsSize[fontSize] + 2 },
+              { color: theme.paid, fontSize: FontsSize[fontSize] + 2 },
             ]}
           >
             🟢 Pagados ({totalPaid})
@@ -500,11 +536,7 @@ export default function PaymentScreen() {
               </Text>
             ) : (
               completedPayments.map((payment, index) =>
-                renderPaymentItem(
-                  payment,
-                  true,
-                  `completed-${payment.id}-${index}`
-                )
+                renderPaymentItem(payment, true, `paid-${payment.id}-${index}`)
               )
             )}
           </View>
@@ -513,45 +545,148 @@ export default function PaymentScreen() {
 
       {/* Floating Add Button */}
       <TouchableOpacity
-        style={[styles.floatingButton, { backgroundColor: Colors.light.tint }]}
+        style={[styles.floatingButton, { backgroundColor: theme.tint }]}
         onPress={handleAddPayment}
         activeOpacity={0.8}
       >
         <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    paddingBottom: 20,
+  titleContainer: {
+    paddingTop: Platform.OS === "ios" ? 15 : 20,
+    paddingBottom: 15,
+    paddingHorizontal: 20,
     alignItems: "center",
+    justifyContent: "center",
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
-    marginBottom: 10,
+    minHeight: 60,
+    maxHeight: 80,
+    marginTop: Platform.OS === "android" ? 10 : 0,
+  },
+  titleText: {
+    fontWeight: "bold",
+    fontFamily:
+      Platform.OS === "ios" ? "Arial Rounded MT Bold" : "sans-serif-medium",
+    textAlign: "center",
+  },
+  header: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    maxHeight: 80, // Reducir altura máxima
+    minHeight: 60,
+    marginBottom: 16, // Añadir separación con el contenido de abajo
+  },
+  headerTitleContainer: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 30,
+    marginBottom: 4,
   },
   headerText: {
     fontWeight: "bold",
     fontFamily:
       Platform.OS === "ios" ? "Arial Rounded MT Bold" : "sans-serif-medium",
   },
+  container: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+  monthSelectorContainer: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  monthSelector: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 4,
+    marginTop: 4, // Reducir margen superior
+    maxWidth: "100%", // Asegurar que no se desborde
+  },
+  monthButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  monthDisplay: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+    marginHorizontal: 6,
+    borderWidth: 2,
+    borderRadius: 12,
+    minWidth: 0,
+    maxWidth: "70%", // Limitar ancho máximo
+    minHeight: 32,
+  },
+  monthText: {
+    fontWeight: "bold",
+    textAlign: "center",
+    flexShrink: 1,
+    lineHeight: 16,
+  },
+  monthHint: {
+    textAlign: "center",
+    marginTop: 1,
+    fontStyle: "italic",
+    flexShrink: 1,
+    lineHeight: 12,
+  },
   summaryContainer: {
     flexDirection: "row",
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    marginBottom: 16,
+    marginHorizontal: 8,
+    marginTop: 8, // Añadir separación adicional desde arriba
+    borderRadius: 12,
     justifyContent: "space-around",
+    borderWidth: 1,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    minHeight: 80, // Altura mínima
+    maxHeight: 100, // Altura máxima para evitar desbordamiento
   },
   summaryItem: {
     alignItems: "center",
+    flex: 1,
+    paddingHorizontal: 2,
+    justifyContent: "center",
   },
   summaryNumber: {
     fontWeight: "bold",
-    marginBottom: 4,
+    marginBottom: 2,
+    textAlign: "center",
+    flexShrink: 1,
   },
   summaryLabel: {
     textAlign: "center",
+    flexShrink: 1,
+    lineHeight: 16,
+    maxWidth: "100%",
   },
   sectionHeader: {
     flexDirection: "row",
@@ -559,23 +694,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 16,
     paddingHorizontal: 20,
-    borderBottomWidth: 1,
+    marginBottom: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
   },
   sectionTitle: {
     fontWeight: "bold",
   },
   sectionContent: {
-    padding: 16,
+    marginBottom: 16,
   },
   surgeryCard: {
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    elevation: 2,
+    elevation: 3,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.13,
+    shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
   },
   surgeryHeader: {
@@ -641,6 +783,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
+    backgroundColor: Colors.light.tint,
     elevation: 8,
     shadowColor: "#000",
     shadowOpacity: 0.3,
@@ -649,37 +792,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1000,
-  },
-  monthSelector: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 12,
-    gap: 12,
-  },
-  monthButton: {
-    borderWidth: 1,
-    borderRadius: 20,
-    padding: 8,
-    minWidth: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  monthDisplay: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    alignItems: "center",
-    minWidth: 180,
-  },
-  monthText: {
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  monthHint: {
-    textAlign: "center",
-    fontStyle: "italic",
-    marginTop: 2,
   },
 });

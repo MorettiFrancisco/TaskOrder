@@ -35,15 +35,16 @@ export default function ModificarPagoScreen() {
   const [amount, setAmount] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
   const router = useRouter();
   const { fontSize } = useConfiguracion();
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
-  const backgroundColor = theme.background;
+  const backgroundColor = colorScheme === "dark" ? "#23272f" : "#fff";
 
   // Card background colors consistent with other screens
-  const cardBg = theme.card;
-  const borderColor = theme.cardBorder;
+  const cardBg = colorScheme === "dark" ? "#2a2e37" : "#fff";
+  const borderColor = colorScheme === "dark" ? "#353945" : "#eee";
 
   useEffect(() => {
     loadPaymentData();
@@ -160,7 +161,7 @@ export default function ModificarPagoScreen() {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor }]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.tint} />
+          <ActivityIndicator size="large" color={Colors.light.tint} />
           <Text
             style={[
               styles.loadingText,
@@ -187,7 +188,7 @@ export default function ModificarPagoScreen() {
             No se pudo cargar la información del pago
           </Text>
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: theme.tint }]}
+            style={[styles.button, { backgroundColor: Colors.light.tint }]}
             onPress={() => router.back()}
           >
             <Text style={styles.buttonText}>Volver</Text>
@@ -211,12 +212,12 @@ export default function ModificarPagoScreen() {
           onPress={() => router.push("/(tabs)/payment")}
           activeOpacity={0.7}
         >
-          <Ionicons name="arrow-back" size={24} color={theme.tint} />
+          <Ionicons name="arrow-back" size={24} color={Colors.light.tint} />
         </TouchableOpacity>
         <Text
           style={[
             styles.headerText,
-            { color: theme.tint, fontSize: FontsSize[fontSize] + 4 },
+            { color: Colors.light.tint, fontSize: FontsSize[fontSize] + 4 },
           ]}
         >
           Modificar Pago
@@ -242,7 +243,7 @@ export default function ModificarPagoScreen() {
           <Text
             style={[
               styles.cardTitle,
-              { color: theme.tint, fontSize: FontsSize[fontSize] + 2 },
+              { color: Colors.light.tint, fontSize: FontsSize[fontSize] + 2 },
             ]}
           >
             Información del Pago
@@ -300,9 +301,7 @@ export default function ModificarPagoScreen() {
                 styles.statusBadge,
                 {
                   backgroundColor:
-                    payment.paymentStatus === "paid"
-                      ? theme.paid
-                      : theme.pending,
+                    payment.paymentStatus === "paid" ? "#4CAF50" : "#FF5722",
                 },
               ]}
             >
@@ -347,7 +346,7 @@ export default function ModificarPagoScreen() {
           <Text
             style={[
               styles.cardTitle,
-              { color: theme.tint, fontSize: FontsSize[fontSize] + 2 },
+              { color: Colors.light.tint, fontSize: FontsSize[fontSize] + 2 },
             ]}
           >
             Monto del Pago
@@ -367,8 +366,9 @@ export default function ModificarPagoScreen() {
                 style={[
                   styles.amountDisplay,
                   {
-                    backgroundColor: theme.background,
-                    borderColor: theme.border,
+                    backgroundColor:
+                      colorScheme === "dark" ? "#1a1e25" : "#f8f8f8",
+                    borderColor: colorScheme === "dark" ? "#353945" : "#ddd",
                   },
                 ]}
               >
@@ -376,7 +376,7 @@ export default function ModificarPagoScreen() {
                   style={[
                     styles.amountText,
                     {
-                      color: theme.tint,
+                      color: Colors.light.tint,
                       fontSize: FontsSize[fontSize] + 2,
                     },
                   ]}
@@ -398,15 +398,16 @@ export default function ModificarPagoScreen() {
                   styles.input,
                   {
                     color: theme.text,
-                    borderColor: theme.border,
-                    backgroundColor: theme.background,
+                    borderColor: colorScheme === "dark" ? "#353945" : "#ddd",
+                    backgroundColor:
+                      colorScheme === "dark" ? "#1a1e25" : "#f8f8f8",
                     fontSize: FontsSize[fontSize],
                   },
                 ]}
                 value={amount}
                 onChangeText={handleAmountChange}
                 placeholder="$0,00"
-                placeholderTextColor={theme.muted}
+                placeholderTextColor={colorScheme === "dark" ? "#666" : "#999"}
                 keyboardType="numeric"
                 editable={!saving}
               />
@@ -421,7 +422,7 @@ export default function ModificarPagoScreen() {
               style={[
                 styles.button,
                 styles.primaryButton,
-                { backgroundColor: theme.success },
+                { backgroundColor: "#4CAF50" },
                 saving && styles.disabledButton,
               ]}
               onPress={handleMarkAsPaid}
@@ -450,7 +451,7 @@ export default function ModificarPagoScreen() {
             style={[
               styles.button,
               styles.dangerButton,
-              { backgroundColor: theme.danger },
+              { backgroundColor: "#FF5722" },
               saving && styles.disabledButton,
             ]}
             onPress={handleDeletePayment}

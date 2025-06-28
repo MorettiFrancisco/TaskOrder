@@ -18,7 +18,7 @@ import {
   agregarPago,
   actualizarPago,
 } from "../../utils/paymentsStorage";
-import { formatCurrencyInput, parseCurrency } from "../../utils/formatCurrency";
+import { formatCurrencyInput, parseCurrency } from "./formatCurrency";
 import Ficha from "../../models/ficha";
 import Payment from "../../models/payment";
 import { useColorScheme } from "react-native";
@@ -49,7 +49,7 @@ export default function AgregarPagoScreen() {
   const colorScheme = useColorScheme();
   const { fontSize } = useConfiguracion();
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
-  const backgroundColor = colorScheme === "dark" ? "#23272f" : "#fff";
+  const backgroundColor = theme.background;
 
   useFocusEffect(
     useCallback(() => {
@@ -169,7 +169,7 @@ export default function AgregarPagoScreen() {
         <Text
           style={[
             styles.headerText,
-            { color: Colors.light.tint, fontSize: FontsSize[fontSize] + 6 },
+            { color: theme.tint, fontSize: FontsSize[fontSize] + 6 },
           ]}
         >
           💰 Gestionar Pagos
@@ -184,9 +184,8 @@ export default function AgregarPagoScreen() {
               styles.searchInput,
               {
                 color: theme.text,
-                borderColor:
-                  colorScheme === "dark" ? "#555" : Colors.light.tint,
-                backgroundColor: colorScheme === "dark" ? "#2a2e37" : "#fff",
+                borderColor: theme.tint,
+                backgroundColor: theme.background,
                 fontSize: FontsSize[fontSize],
               },
             ]}
@@ -199,16 +198,11 @@ export default function AgregarPagoScreen() {
         </View>
 
         {/* Técnicas Quirúrgicas Disponibles */}
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: colorScheme === "dark" ? "#2a2e37" : "#fff" },
-          ]}
-        >
+        <View style={[styles.section, { backgroundColor: theme.background }]}>
           <Text
             style={[
               styles.sectionTitle,
-              { color: Colors.light.tint, fontSize: FontsSize[fontSize] + 2 },
+              { color: theme.tint, fontSize: FontsSize[fontSize] + 2 },
             ]}
           >
             🏥 Técnicas Quirúrgicas Disponibles ({getFilteredFichas().length})
@@ -229,14 +223,20 @@ export default function AgregarPagoScreen() {
             getFilteredFichas().map((ficha) => (
               <TouchableOpacity
                 key={ficha.id}
-                style={[styles.fichaCard, { borderColor: Colors.light.tint }]}
+                style={[
+                  styles.fichaCard,
+                  {
+                    borderColor: theme.cardBorder,
+                    backgroundColor: theme.card,
+                  },
+                ]}
                 onPress={() => handleSelectFicha(ficha)}
               >
                 <Text
                   style={[
                     styles.fichaTitle,
                     {
-                      color: Colors.light.tint,
+                      color: theme.tint,
                       fontSize: FontsSize[fontSize] + 1,
                     },
                   ]}
@@ -266,10 +266,7 @@ export default function AgregarPagoScreen() {
       >
         <View style={styles.modalOverlay}>
           <View
-            style={[
-              styles.modalContent,
-              { backgroundColor: colorScheme === "dark" ? "#2a2e37" : "#fff" },
-            ]}
+            style={[styles.modalContent, { backgroundColor: theme.background }]}
           >
             <Text
               style={[
@@ -286,7 +283,10 @@ export default function AgregarPagoScreen() {
                   key={ficha.id}
                   style={[
                     styles.modalFichaItem,
-                    { borderColor: colorScheme === "dark" ? "#555" : "#ddd" },
+                    {
+                      borderColor: theme.cardBorder,
+                      backgroundColor: theme.card,
+                    },
                   ]}
                   onPress={() => handleSelectFicha(ficha)}
                 >
@@ -294,7 +294,7 @@ export default function AgregarPagoScreen() {
                     style={[
                       styles.modalFichaTitle,
                       {
-                        color: Colors.light.tint,
+                        color: theme.tint,
                         fontSize: FontsSize[fontSize] + 1,
                       },
                     ]}
@@ -332,10 +332,7 @@ export default function AgregarPagoScreen() {
       >
         <View style={styles.modalOverlay}>
           <View
-            style={[
-              styles.modalContent,
-              { backgroundColor: colorScheme === "dark" ? "#2a2e37" : "#fff" },
-            ]}
+            style={[styles.modalContent, { backgroundColor: theme.background }]}
           >
             <Text
               style={[
@@ -353,7 +350,7 @@ export default function AgregarPagoScreen() {
                 style={[
                   styles.modalSubtitle,
                   {
-                    color: Colors.light.tint,
+                    color: theme.tint,
                     fontSize: FontsSize[fontSize] + 1,
                   },
                 ]}
@@ -403,9 +400,7 @@ export default function AgregarPagoScreen() {
                     styles.radioButton,
                     {
                       borderColor:
-                        paymentSource === "patient"
-                          ? Colors.light.tint
-                          : "#ccc",
+                        paymentSource === "patient" ? theme.tint : theme.border,
                     },
                   ]}
                   onPress={() => setPaymentSource("patient")}
@@ -416,7 +411,7 @@ export default function AgregarPagoScreen() {
                       {
                         backgroundColor:
                           paymentSource === "patient"
-                            ? Colors.light.tint
+                            ? theme.tint
                             : "transparent",
                       },
                     ]}
@@ -436,7 +431,7 @@ export default function AgregarPagoScreen() {
                     styles.radioButton,
                     {
                       borderColor:
-                        paymentSource === "clinic" ? Colors.light.tint : "#ccc",
+                        paymentSource === "clinic" ? theme.tint : theme.border,
                     },
                   ]}
                   onPress={() => setPaymentSource("clinic")}
@@ -447,7 +442,7 @@ export default function AgregarPagoScreen() {
                       {
                         backgroundColor:
                           paymentSource === "clinic"
-                            ? Colors.light.tint
+                            ? theme.tint
                             : "transparent",
                       },
                     ]}
@@ -607,10 +602,7 @@ export default function AgregarPagoScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[
-                  styles.modalButton,
-                  { backgroundColor: Colors.light.tint },
-                ]}
+                style={[styles.modalButton, { backgroundColor: theme.tint }]}
                 onPress={handleSavePayment}
               >
                 <Text style={styles.modalButtonText}>Guardar</Text>

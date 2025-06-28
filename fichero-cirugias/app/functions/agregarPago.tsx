@@ -18,6 +18,7 @@ import {
   agregarPago,
   actualizarPago,
 } from "../../utils/paymentsStorage";
+import { formatCurrencyInput, parseCurrency } from "../../utils/formatCurrency";
 import Ficha from "../../models/ficha";
 import Payment from "../../models/payment";
 import { useColorScheme } from "react-native";
@@ -31,6 +32,7 @@ export default function AgregarPagoScreen() {
   const [selectedFicha, setSelectedFicha] = useState<Ficha | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [fichaModalVisible, setFichaModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Payment form fields
   const [doctor, setDoctor] = useState("");
@@ -74,10 +76,18 @@ export default function AgregarPagoScreen() {
     setSelectedFicha(null);
   };
 
+  const handleAmountChange = (text: string) => {
+    // Format input as user types for currency
+    const formatted = formatCurrencyInput(text);
+    setAmount(formatted);
+  };
+
   const handleSelectFicha = (ficha: Ficha) => {
     setSelectedFicha(ficha);
     setFichaModalVisible(false);
     setModalVisible(true);
+    // Opcionalmente limpiar la búsqueda
+    // setSearchQuery("");
   };
 
   const handleSavePayment = async () => {
@@ -96,7 +106,9 @@ export default function AgregarPagoScreen() {
 
     if (
       paymentSource === "patient" &&
-      (!amount.trim() || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0)
+      (!amount.trim() ||
+        isNaN(parseCurrency(amount)) ||
+        parseCurrency(amount) <= 0)
     ) {
       Alert.alert(
         "Error",
@@ -108,7 +120,7 @@ export default function AgregarPagoScreen() {
     try {
       const existingPayment = pagos.find((p) => p.fichaId === selectedFicha.id);
       const paymentAmount =
-        paymentSource === "patient" ? parseFloat(amount) : undefined;
+        paymentSource === "patient" ? parseCurrency(amount) : undefined;
       const currentDate = new Date();
 
       // Always create new payment (multiple payments allowed per ficha)
@@ -129,6 +141,9 @@ export default function AgregarPagoScreen() {
 
       setModalVisible(false);
       resetForm();
+
+      // Navigate back to payment screen
+      router.push("/(tabs)/payment");
     } catch (error) {
       Alert.alert("Error", "No se pudo guardar el pago");
     }
@@ -136,6 +151,16 @@ export default function AgregarPagoScreen() {
 
   const getAllFichas = () => {
     return fichas; // Mostrar todas las fichas, ya que pueden tener múltiples pagos
+  };
+
+  const getFilteredFichas = () => {
+    if (!searchQuery.trim()) {
+      return getAllFichas();
+    }
+
+    return getAllFichas().filter((ficha) =>
+      ficha.nombre_tecnica.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   };
 
   return (
@@ -152,6 +177,27 @@ export default function AgregarPagoScreen() {
       </View>
 
       <ScrollView style={styles.content}>
+        {/* Search Box */}
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={[
+              styles.searchInput,
+              {
+                color: theme.text,
+                borderColor:
+                  colorScheme === "dark" ? "#555" : Colors.light.tint,
+                backgroundColor: colorScheme === "dark" ? "#2a2e37" : "#fff",
+                fontSize: FontsSize[fontSize],
+              },
+            ]}
+            placeholder="Buscar por técnica quirúrgica..."
+            placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#999"}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            clearButtonMode="while-editing"
+          />
+        </View>
+
         {/* Técnicas Quirúrgicas Disponibles */}
         <View
           style={[
@@ -165,20 +211,22 @@ export default function AgregarPagoScreen() {
               { color: Colors.light.tint, fontSize: FontsSize[fontSize] + 2 },
             ]}
           >
-            🏥 Técnicas Quirúrgicas Disponibles ({getAllFichas().length})
+            🏥 Técnicas Quirúrgicas Disponibles ({getFilteredFichas().length})
           </Text>
 
-          {getAllFichas().length === 0 ? (
+          {getFilteredFichas().length === 0 ? (
             <Text
               style={[
                 styles.emptyText,
                 { color: theme.text, fontSize: FontsSize[fontSize] },
               ]}
             >
-              📝 No hay técnicas quirúrgicas registradas
+              {searchQuery.trim()
+                ? `📝 No se encontraron técnicas que coincidan con "${searchQuery}"`
+                : "📝 No hay técnicas quirúrgicas registradas"}
             </Text>
           ) : (
-            getAllFichas().map((ficha) => (
+            getFilteredFichas().map((ficha) => (
               <TouchableOpacity
                 key={ficha.id}
                 style={[styles.fichaCard, { borderColor: Colors.light.tint }]}
@@ -233,7 +281,7 @@ export default function AgregarPagoScreen() {
             </Text>
 
             <ScrollView style={styles.modalList}>
-              {fichas.map((ficha) => (
+              {getFilteredFichas().map((ficha) => (
                 <TouchableOpacity
                   key={ficha.id}
                   style={[
@@ -508,8 +556,8 @@ export default function AgregarPagoScreen() {
                       },
                     ]}
                     value={amount}
-                    onChangeText={setAmount}
-                    placeholder="0.00"
+                    onChangeText={handleAmountChange}
+                    placeholder="$0,00"
                     placeholderTextColor={
                       colorScheme === "dark" ? "#aaa" : "#888"
                     }
@@ -595,6 +643,15 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 16,
+  },
+  searchContainer: {
+    marginBottom: 16,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
   },
   section: {
     borderRadius: 12,

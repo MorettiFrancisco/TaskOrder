@@ -15,6 +15,11 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { cargarPagos, guardarPagos } from "../../utils/paymentsStorage";
 import { cargarFichas } from "../../utils/fichasStorage";
+import {
+  formatCurrency,
+  formatCurrencyInput,
+  parseCurrency,
+} from "../../utils/formatCurrency";
 import Payment from "../../models/payment";
 import Ficha from "../../models/ficha";
 import { useConfiguracion } from "../context/configuracionContext";
@@ -43,6 +48,12 @@ export default function ModificarPagoScreen() {
     loadPaymentData();
   }, [paymentId]);
 
+  const handleAmountChange = (text: string) => {
+    // Format input as user types for currency
+    const formatted = formatCurrencyInput(text);
+    setAmount(formatted);
+  };
+
   const loadPaymentData = async () => {
     try {
       setLoading(true);
@@ -52,7 +63,9 @@ export default function ModificarPagoScreen() {
       const foundPayment = pagos.find((p) => p.id.toString() === paymentId);
       if (foundPayment) {
         setPayment(foundPayment);
-        setAmount(foundPayment.amount?.toString() || "");
+        setAmount(
+          foundPayment.amount ? formatCurrency(foundPayment.amount) : ""
+        );
 
         const foundFicha = fichas.find((f) => f.id === foundPayment.fichaId);
         setFicha(foundFicha || null);
@@ -72,12 +85,12 @@ export default function ModificarPagoScreen() {
     if (!payment) return;
 
     // Si el pago ya tiene un monto establecido, solo cambiar el estado
-    const finalAmount = payment.amount || parseFloat(amount);
+    const finalAmount = payment.amount || parseCurrency(amount);
 
     // Si no hay monto y es necesario, validar
     if (
       !payment.amount &&
-      (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0)
+      (!amount || isNaN(parseCurrency(amount)) || parseCurrency(amount) <= 0)
     ) {
       Alert.alert("Error", "Por favor ingrese un monto válido mayor a 0");
       return;
@@ -100,7 +113,7 @@ export default function ModificarPagoScreen() {
 
       await guardarPagos(updatedPayments);
       Alert.alert("Éxito", "Pago marcado como pagado correctamente", [
-        { text: "OK", onPress: () => router.back() },
+        { text: "OK", onPress: () => router.push("/(tabs)/payment") },
       ]);
     } catch (error) {
       console.error("Error updating payment:", error);
@@ -128,7 +141,7 @@ export default function ModificarPagoScreen() {
               const filteredPayments = pagos.filter((p) => p.id !== payment.id);
               await guardarPagos(filteredPayments);
               Alert.alert("Éxito", "Pago eliminado correctamente", [
-                { text: "OK", onPress: () => router.back() },
+                { text: "OK", onPress: () => router.push("/(tabs)/payment") },
               ]);
             } catch (error) {
               console.error("Error deleting payment:", error);
@@ -364,7 +377,7 @@ export default function ModificarPagoScreen() {
                     },
                   ]}
                 >
-                  ${payment.amount.toFixed(2)}
+                  {formatCurrency(payment.amount)}
                 </Text>
                 <Text
                   style={[
@@ -388,8 +401,8 @@ export default function ModificarPagoScreen() {
                   },
                 ]}
                 value={amount}
-                onChangeText={setAmount}
-                placeholder="Ingrese el monto"
+                onChangeText={handleAmountChange}
+                placeholder="$0,00"
                 placeholderTextColor={colorScheme === "dark" ? "#666" : "#999"}
                 keyboardType="numeric"
                 editable={!saving}

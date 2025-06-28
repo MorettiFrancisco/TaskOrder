@@ -13,6 +13,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { cargarFichas } from "../../utils/fichasStorage";
 import { cargarPagos } from "../../utils/paymentsStorage";
+import { formatCurrency } from "../../utils/formatCurrency";
 import Ficha from "../../models/ficha";
 import Payment from "../../models/payment";
 import { useConfiguracion } from "../context/configuracionContext";
@@ -70,7 +71,7 @@ export default function PaymentScreen() {
         );
       }
 
-      // For pending payments, show them in the current month only
+      // For pending payments, show in current month regardless of source
       if (payment.paymentStatus === "pending") {
         const currentDate = new Date();
         return (
@@ -207,7 +208,7 @@ export default function PaymentScreen() {
               onPress={() => handleEditPayment(payment)}
               activeOpacity={0.7}
             >
-              <Ionicons name="pencil" size={16} color={Colors.light.tint} />
+              <AntDesign name="edit" size={16} color={Colors.light.tint} />
             </TouchableOpacity>
             <View
               style={[
@@ -265,7 +266,7 @@ export default function PaymentScreen() {
               },
             ]}
           >
-            💰 Monto: ${payment.amount.toFixed(2)}
+            💰 Monto: {formatCurrency(payment.amount)}
           </Text>
         )}
       </View>
@@ -393,7 +394,7 @@ export default function PaymentScreen() {
               { color: Colors.light.tint, fontSize: FontsSize[fontSize] + 2 },
             ]}
           >
-            ${totalPaidAmount.toFixed(2)}
+            {formatCurrency(totalPaidAmount)}
           </Text>
           <Text
             style={[

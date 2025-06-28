@@ -276,7 +276,12 @@ export default function PaymentScreen() {
       {/* Main Content Container */}
       <View style={{ flex: 1, paddingTop: Platform.OS === "ios" ? 0 : 20 }}>
         {/* Title */}
-        <View style={[styles.titleContainer, { backgroundColor, borderBottomColor: theme.cardBorder }]}>
+        <View
+          style={[
+            styles.titleContainer,
+            { backgroundColor, borderBottomColor: theme.cardBorder },
+          ]}
+        >
           <Text
             style={[
               styles.titleText,
@@ -295,262 +300,266 @@ export default function PaymentScreen() {
 
         <View style={[styles.header, { backgroundColor }]}>
           {/* Month/Year Selector */}
-        <View style={styles.monthSelector}>
-          <TouchableOpacity
-            style={[styles.monthButton, { borderColor: theme.tint }]}
-            onPress={() => handleMonthChange("prev")}
-            activeOpacity={0.7}
-          >
-            <AntDesign name="left" size={16} color={theme.tint} />
-          </TouchableOpacity>
+          <View style={styles.monthSelector}>
+            <TouchableOpacity
+              style={[styles.monthButton, { borderColor: theme.tint }]}
+              onPress={() => handleMonthChange("prev")}
+              activeOpacity={0.7}
+            >
+              <AntDesign name="left" size={16} color={theme.tint} />
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.monthDisplay, { borderColor: theme.tint }]}
-            onPress={goToCurrentMonth}
-            activeOpacity={0.7}
-          >
+            <TouchableOpacity
+              style={[styles.monthDisplay, { borderColor: theme.tint }]}
+              onPress={goToCurrentMonth}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={[
+                  styles.monthText,
+                  {
+                    color: theme.tint,
+                    fontSize: Math.min(FontsSize[fontSize], 16), // Reducir tamaño máximo
+                  },
+                ]}
+                numberOfLines={1}
+                adjustsFontSizeToFit={true}
+              >
+                {getMonthName(selectedMonth)} {selectedYear}
+              </Text>
+              <Text
+                style={[
+                  styles.monthHint,
+                  {
+                    color: theme.muted,
+                    fontSize: Math.min(FontsSize[fontSize] - 3, 10), // Reducir tamaño
+                  },
+                ]}
+                numberOfLines={1}
+                adjustsFontSizeToFit={true}
+              >
+                Toca para ir al mes actual
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.monthButton, { borderColor: theme.tint }]}
+              onPress={() => handleMonthChange("next")}
+              activeOpacity={0.7}
+            >
+              <AntDesign name="right" size={16} color={theme.tint} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Summary */}
+        <View
+          style={[
+            styles.summaryContainer,
+            {
+              backgroundColor: cardBg,
+              borderColor: borderColor,
+            },
+          ]}
+        >
+          <View style={styles.summaryItem}>
             <Text
               style={[
-                styles.monthText,
+                styles.summaryNumber,
+                {
+                  color: theme.pending,
+                  fontSize: Math.min(FontsSize[fontSize] + 3, 28), // Limitar tamaño
+                },
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
+            >
+              {totalPending}
+            </Text>
+            <Text
+              style={[
+                styles.summaryLabel,
+                {
+                  color: theme.text,
+                  fontSize: Math.min(FontsSize[fontSize] - 1, 14), // Limitar tamaño
+                },
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
+            >
+              Pendientes
+            </Text>
+          </View>
+
+          <View style={styles.summaryItem}>
+            <Text
+              style={[
+                styles.summaryNumber,
+                {
+                  color: theme.paid,
+                  fontSize: Math.min(FontsSize[fontSize] + 3, 28), // Limitar tamaño
+                },
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
+            >
+              {totalPaid}
+            </Text>
+            <Text
+              style={[
+                styles.summaryLabel,
+                {
+                  color: theme.text,
+                  fontSize: Math.min(FontsSize[fontSize] - 1, 14), // Limitar tamaño
+                },
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
+            >
+              Pagados
+            </Text>
+          </View>
+
+          <View style={styles.summaryItem}>
+            <Text
+              style={[
+                styles.summaryNumber,
                 {
                   color: theme.tint,
-                  fontSize: Math.min(FontsSize[fontSize], 16), // Reducir tamaño máximo
+                  fontSize: Math.min(FontsSize[fontSize] + 1, 22), // Más pequeño para texto largo
                 },
               ]}
-              numberOfLines={1}
+              numberOfLines={2}
               adjustsFontSizeToFit={true}
             >
-              {getMonthName(selectedMonth)} {selectedYear}
+              {formatCurrency(totalPaidAmount)}
             </Text>
             <Text
               style={[
-                styles.monthHint,
+                styles.summaryLabel,
                 {
-                  color: theme.muted,
-                  fontSize: Math.min(FontsSize[fontSize] - 3, 10), // Reducir tamaño
+                  color: theme.text,
+                  fontSize: Math.min(FontsSize[fontSize] - 1, 14), // Limitar tamaño
                 },
               ]}
-              numberOfLines={1}
+              numberOfLines={2}
               adjustsFontSizeToFit={true}
             >
-              Toca para ir al mes actual
+              Total Recaudado
             </Text>
-          </TouchableOpacity>
+          </View>
+        </View>
 
+        <ScrollView
+          style={{ flex: 1, backgroundColor }}
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* To Be Paid Section */}
           <TouchableOpacity
-            style={[styles.monthButton, { borderColor: theme.tint }]}
-            onPress={() => handleMonthChange("next")}
+            style={[
+              styles.sectionHeader,
+              { backgroundColor: cardBg, borderColor },
+            ]}
+            onPress={() => setShowToBePaid(!showToBePaid)}
             activeOpacity={0.7}
           >
-            <AntDesign name="right" size={16} color={theme.tint} />
+            <Text
+              style={[
+                styles.sectionTitle,
+                { color: theme.pending, fontSize: FontsSize[fontSize] + 2 },
+              ]}
+            >
+              🔴 Por Pagar ({totalPending})
+            </Text>
+            <AntDesign
+              name={showToBePaid ? "up" : "down"}
+              size={20}
+              color={theme.text}
+            />
           </TouchableOpacity>
-        </View>
-      </View>
 
-      {/* Summary */}
-      <View
-        style={[
-          styles.summaryContainer,
-          {
-            backgroundColor: cardBg,
-            borderColor: borderColor,
-          },
-        ]}
-      >
-        <View style={styles.summaryItem}>
-          <Text
-            style={[
-              styles.summaryNumber,
-              {
-                color: theme.pending,
-                fontSize: Math.min(FontsSize[fontSize] + 3, 28), // Limitar tamaño
-              },
-            ]}
-            numberOfLines={1}
-            adjustsFontSizeToFit={true}
-          >
-            {totalPending}
-          </Text>
-          <Text
-            style={[
-              styles.summaryLabel,
-              {
-                color: theme.text,
-                fontSize: Math.min(FontsSize[fontSize] - 1, 14), // Limitar tamaño
-              },
-            ]}
-            numberOfLines={1}
-            adjustsFontSizeToFit={true}
-          >
-            Pendientes
-          </Text>
-        </View>
-
-        <View style={styles.summaryItem}>
-          <Text
-            style={[
-              styles.summaryNumber,
-              {
-                color: theme.paid,
-                fontSize: Math.min(FontsSize[fontSize] + 3, 28), // Limitar tamaño
-              },
-            ]}
-            numberOfLines={1}
-            adjustsFontSizeToFit={true}
-          >
-            {totalPaid}
-          </Text>
-          <Text
-            style={[
-              styles.summaryLabel,
-              {
-                color: theme.text,
-                fontSize: Math.min(FontsSize[fontSize] - 1, 14), // Limitar tamaño
-              },
-            ]}
-            numberOfLines={1}
-            adjustsFontSizeToFit={true}
-          >
-            Pagados
-          </Text>
-        </View>
-
-        <View style={styles.summaryItem}>
-          <Text
-            style={[
-              styles.summaryNumber,
-              {
-                color: theme.tint,
-                fontSize: Math.min(FontsSize[fontSize] + 1, 22), // Más pequeño para texto largo
-              },
-            ]}
-            numberOfLines={2}
-            adjustsFontSizeToFit={true}
-          >
-            {formatCurrency(totalPaidAmount)}
-          </Text>
-          <Text
-            style={[
-              styles.summaryLabel,
-              {
-                color: theme.text,
-                fontSize: Math.min(FontsSize[fontSize] - 1, 14), // Limitar tamaño
-              },
-            ]}
-            numberOfLines={2}
-            adjustsFontSizeToFit={true}
-          >
-            Total Recaudado
-          </Text>
-        </View>
-      </View>
-
-      <ScrollView
-        style={{ flex: 1, backgroundColor }}
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* To Be Paid Section */}
-        <TouchableOpacity
-          style={[
-            styles.sectionHeader,
-            { backgroundColor: cardBg, borderColor },
-          ]}
-          onPress={() => setShowToBePaid(!showToBePaid)}
-          activeOpacity={0.7}
-        >
-          <Text
-            style={[
-              styles.sectionTitle,
-              { color: theme.pending, fontSize: FontsSize[fontSize] + 2 },
-            ]}
-          >
-            🔴 Por Pagar ({totalPending})
-          </Text>
-          <AntDesign
-            name={showToBePaid ? "up" : "down"}
-            size={20}
-            color={theme.text}
-          />
-        </TouchableOpacity>
-
-        {showToBePaid && (
-          <View style={styles.sectionContent}>
-            {pendingPayments.length === 0 ? (
-              <Text
-                style={[
-                  styles.emptyText,
-                  { color: theme.text, fontSize: FontsSize[fontSize] },
-                ]}
-              >
-                📝 No hay pagos pendientes registrados para{" "}
-                {getMonthName(selectedMonth)} {selectedYear}
-              </Text>
-            ) : (
-              pendingPayments.map((payment, index) =>
-                renderPaymentItem(
-                  payment,
-                  false,
-                  `pending-${payment.id}-${index}`
+          {showToBePaid && (
+            <View style={styles.sectionContent}>
+              {pendingPayments.length === 0 ? (
+                <Text
+                  style={[
+                    styles.emptyText,
+                    { color: theme.text, fontSize: FontsSize[fontSize] },
+                  ]}
+                >
+                  📝 No hay pagos pendientes registrados para{" "}
+                  {getMonthName(selectedMonth)} {selectedYear}
+                </Text>
+              ) : (
+                pendingPayments.map((payment, index) =>
+                  renderPaymentItem(
+                    payment,
+                    false,
+                    `pending-${payment.id}-${index}`
+                  )
                 )
-              )
-            )}
-          </View>
-        )}
+              )}
+            </View>
+          )}
 
-        {/* Paid Section */}
-        <TouchableOpacity
-          style={[
-            styles.sectionHeader,
-            { backgroundColor: cardBg, borderColor },
-          ]}
-          onPress={() => setShowPaid(!showPaid)}
-          activeOpacity={0.7}
-        >
-          <Text
+          {/* Paid Section */}
+          <TouchableOpacity
             style={[
-              styles.sectionTitle,
-              { color: theme.paid, fontSize: FontsSize[fontSize] + 2 },
+              styles.sectionHeader,
+              { backgroundColor: cardBg, borderColor },
             ]}
+            onPress={() => setShowPaid(!showPaid)}
+            activeOpacity={0.7}
           >
-            🟢 Pagados ({totalPaid})
-          </Text>
-          <AntDesign
-            name={showPaid ? "up" : "down"}
-            size={20}
-            color={theme.text}
-          />
+            <Text
+              style={[
+                styles.sectionTitle,
+                { color: theme.paid, fontSize: FontsSize[fontSize] + 2 },
+              ]}
+            >
+              🟢 Pagados ({totalPaid})
+            </Text>
+            <AntDesign
+              name={showPaid ? "up" : "down"}
+              size={20}
+              color={theme.text}
+            />
+          </TouchableOpacity>
+
+          {showPaid && (
+            <View style={styles.sectionContent}>
+              {completedPayments.length === 0 ? (
+                <Text
+                  style={[
+                    styles.emptyText,
+                    { color: theme.text, fontSize: FontsSize[fontSize] },
+                  ]}
+                >
+                  📝 No hay pagos completados registrados para{" "}
+                  {getMonthName(selectedMonth)} {selectedYear}
+                </Text>
+              ) : (
+                completedPayments.map((payment, index) =>
+                  renderPaymentItem(
+                    payment,
+                    true,
+                    `paid-${payment.id}-${index}`
+                  )
+                )
+              )}
+            </View>
+          )}
+        </ScrollView>
+
+        {/* Floating Add Button */}
+        <TouchableOpacity
+          style={[styles.floatingButton, { backgroundColor: theme.tint }]}
+          onPress={handleAddPayment}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="add" size={30} color="#fff" />
         </TouchableOpacity>
-
-        {showPaid && (
-          <View style={styles.sectionContent}>
-            {completedPayments.length === 0 ? (
-              <Text
-                style={[
-                  styles.emptyText,
-                  { color: theme.text, fontSize: FontsSize[fontSize] },
-                ]}
-              >
-                📝 No hay pagos completados registrados para{" "}
-                {getMonthName(selectedMonth)} {selectedYear}
-              </Text>
-            ) : (
-              completedPayments.map((payment, index) =>
-                renderPaymentItem(payment, true, `paid-${payment.id}-${index}`)
-              )
-            )}
-          </View>
-        )}
-      </ScrollView>
-
-      {/* Floating Add Button */}
-      <TouchableOpacity
-        style={[styles.floatingButton, { backgroundColor: theme.tint }]}
-        onPress={handleAddPayment}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="add" size={30} color="#fff" />
-      </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
